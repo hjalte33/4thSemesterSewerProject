@@ -12,32 +12,36 @@ using namespace cv;
 using namespace std;
 
 void translateImg(Mat img, int offsetx, int offsety) {
+	// translate an image with offset x and y 
 	Mat trans_mat = (Mat_<double>(2, 3) << 1, 0, offsetx, 0, 1, offsety);
 	warpAffine(img, img, trans_mat, img.size());
 }
 
 void centering(Mat src, int minRadius, int step = 2) {
-
+	//first create a blured image to reduce some noice
 	Mat blured;
 	blur(src, blured, Size(9, 9));
+	//vector to store the circles found
 	vector<Vec3f> circles;
 
+	//inrease the circle diametre untill a circle is found. 
 	for (int i = minRadius; circles.size() < 1 && i < blured.rows / 2; i += step) {
 		HoughCircles(blured, circles, CV_HOUGH_GRADIENT, 1, blured.rows / 6, 10, 100, minRadius, i);
 	}
 
+	//translate the image so it's centered
 	int shiftx = circles[0][0] - src.cols / 2;
 	int shifty = circles[0][1] - src.cols / 2;
-
-	cout << shiftx << "  " << shifty << endl;
-
 	translateImg(src,shiftx,shifty);
+	//cout << shiftx << "  " << shifty << endl;   //debugging
+
+	
 
 }
 
 int main()
 {
-	Mat img = imread("./data/hole1.JPG", 0);
+	Mat img = imread("./data/root1.JPG", 0);
 	Mat background = imread("./data/background.JPG", 0);
 	Mat diff = Mat(img.rows, img.cols, 0);
 
@@ -50,21 +54,14 @@ int main()
 
 	// find the center of the image
 	centering(img, 100,5);
-	
+	centering(background, 100, 5);
 
-	/// Draw the circles detected
-	
-
-	/// Show your results
-	
-	namedWindow("Hough Circle Transform Demo",CV_WINDOW_KEEPRATIO);
-	imshow("Hough Circle Transform Demo", img);
-
-	//blur(background, background, Size(99, 99));
+	//substract the background
 	absdiff(img, background, diff);
 
+	// show the result. 
 	namedWindow("photo", CV_WINDOW_KEEPRATIO);
-	imshow("photo", background);
+	imshow("photo", diff);
 	waitKey(0);
 	 
 	
