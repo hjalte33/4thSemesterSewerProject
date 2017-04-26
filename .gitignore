@@ -240,3 +240,6 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/4thSemesterSewerProject/data/root1.jpg
+/4thSemesterSewerProject/data/hole1.jpg
+/4thSemesterSewerProject/data/background.jpg
