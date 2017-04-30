@@ -3,10 +3,13 @@
 
 #include "stdafx.h"
 #include <iostream>
+#include <fstream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <stdio.h>
+
+
 
 using namespace cv;
 using namespace std;
@@ -34,50 +37,114 @@ void centering(Mat src, int minRadius, int step = 2) {
 	int shifty = circles[0][1] - src.cols / 2;
 	translateImg(src,shiftx,shifty);
 	//cout << shiftx << "  " << shifty << endl;   //debugging
-
-	
-
 }
+
+
+struct Path {/* Struct to take care of deviding the path
+			 into directory, filename and extention */
+	//The complete path. Works just like a nomal string. 
+	std::string completepath;
+	std::string dir();
+	std::string filename();
+	std::string ext();
+	Path();
+	Path(const std::string _path); 
+};
+
+
+//returns the directory of the path
+std::string Path::dir() { 
+	std::size_t foundslash = completepath.find_last_of("/\\");
+	std::size_t founddot = completepath.find_last_of(".");
+	return completepath.substr(0, foundslash + 1);
+}
+
+//returns the filename (if any) of the path
+std::string Path::filename() {
+	std::size_t foundslash = completepath.find_last_of("/\\");
+	std::size_t founddot = completepath.find_last_of(".");
+	return completepath.substr(foundslash + 1, founddot-foundslash-1);
+}
+
+// returns the file extention (if any) of the path
+std::string Path::ext() {
+	std::size_t foundslash = completepath.find_last_of("/\\");
+	std::size_t founddot = completepath.find_last_of(".");
+	return completepath.substr(founddot);
+}
+
+// default constructor
+Path::Path(){
+}
+
+/*constructor for the path struct
+takes one argument which is the full path as a string */
+Path::Path(const std::string _path){
+	completepath = _path;
+}
+
+// Saves the image at the same location and write the path to the outfile
+void saveimg(ofstream &writeoutfile, cv::Mat img, Path path, std::string suffix = "_result") { 
+	
+	string savepathname = path.dir() + path.filename() + suffix + path.ext();
+	imwrite(savepathname, img);
+	writeoutfile  << savepathname << endl;
+}
+
+// Saves the image at the same location 
+void saveimg(cv::Mat img, Path path, std::string suffix = "_result") { 
+	
+	string savepathname = path.dir() + path.filename() + suffix + path.ext();
+	imwrite(savepathname, img);
+}
+
 
 int main()
 {
-	Mat img = imread("./data/root1.JPG", 0);
+	//load the background image
 	Mat background = imread("./data/background.JPG", 0);
-	Mat diff = Mat(img.rows, img.cols, 0);
+	
+	// read the image paths from this file 
+	ifstream input("./paths.txt");
+	// save the output paths in this text file
+	ofstream writeoutfile("SavedImgPaths.txt");
 
-	if (!img.data)
-	{
-		return -1;
+	// Go through each image in the path file.
+	// The Path struct is used here so it's easier to extract the
+	// path, filename and file extention when the images is saved.
+	for (Path pathName; getline(input, pathName.completepath);) {
+		
+		Mat img = imread(pathName.completepath, 0);
+		Mat diff = Mat(img.rows, img.cols, 0);
+
+		if (!img.data)
+		{
+			continue;
+		}
+
+		// find the center of the image
+		centering(img, 100, 5);
+		centering(background, 100, 5);
+
+		//substract the background
+		absdiff(img, background, diff);
+
+		// show the result. 
+		namedWindow("photo", CV_WINDOW_KEEPRATIO);
+		imshow("photo", diff);
+		cv::waitKey(1);
+
+
+		saveimg(writeoutfile, diff, pathName);
+
 	}
 
-	
-
-	// find the center of the image
-	centering(img, 100,5);
-	centering(background, 100, 5);
-
-	//substract the background
-	absdiff(img, background, diff);
-
-	// show the result. 
-	namedWindow("photo", CV_WINDOW_KEEPRATIO);
-	imshow("photo", diff);
-	waitKey(0);
+	// wait a little and then close
+	cv::waitKey(2000);
 	 
 	
 	return 0;
 }
 
 
-
-// //draw the cirkle
-//for (size_t i = 0; i < circles.size(); i++)
-//{
-//	Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-//	int radius = cvRound(circles[i][2]);
-//	// circle center
-//	circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
-//	// circle outline
-//	circle(src, center, radius, Scalar(0, 0, 255), 3, 8, 0);
-//}
 
