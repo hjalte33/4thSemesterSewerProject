@@ -1,3 +1,3 @@
-./data/root1.JPG
-./some messed/up path/img.jpg
-./data/hole1.JPG
+﻿C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/RØ Category/Root1.png
+C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/RØ Category/Root1_2.png
+C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/RØ Category/Root1_3.png

@@ -1,2 +1,0 @@
-./data/root1_result.JPG
-./data/hole1_result.JPG

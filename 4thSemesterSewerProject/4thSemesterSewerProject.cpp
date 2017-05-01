@@ -103,9 +103,11 @@ int main()
 {
 	//load the background image
 	Mat background = imread("./data/background.JPG", 0);
-	
+
 	// read the image paths from this file 
 	ifstream input("./paths.txt");
+	string astring;
+	getline(input, astring);
 	// save the output paths in this text file
 	ofstream writeoutfile("SavedImgPaths.txt");
 
