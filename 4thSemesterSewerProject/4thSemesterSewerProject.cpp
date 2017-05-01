@@ -21,7 +21,7 @@ void saveimg(cv::Mat img, Path imgsavepath, Path logsavepath, std::string suffix
 
 	string savepathname = imgsavepath.dir() + imgsavepath.filename() + suffix + imgsavepath.ext();
 	imwrite(savepathname, img);
-	ofstream writeoutfile(logsavepath.dir());
+	ofstream writeoutfile(logsavepath.dir()+"saved log.txt", std::ios_base::app);
 	writeoutfile << savepathname << endl;
 }
 

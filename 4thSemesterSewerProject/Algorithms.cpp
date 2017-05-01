@@ -33,3 +33,7 @@ void centering(Mat src, int minRadius, int step = 2) {
 	translateImg(src, shiftx, shifty);
 	//cout << shiftx << "  " << shifty << endl;   //debugging
 }
+
+void findRoot(cv::Mat src) {
+
+}
