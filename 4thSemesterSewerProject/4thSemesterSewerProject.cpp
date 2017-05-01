@@ -102,12 +102,15 @@ void saveimg(cv::Mat img, Path path, std::string suffix = "_result") {
 int main()
 {
 	//load the background image
-	Mat background = imread("./data/background.JPG", 0);
-
+	Mat background = imread("C:\\Users\\hjalt\\Google Drev\\Uni\\P4 - Project\\project\\Pictures\\NormalPipeWhiteFull.png", 0);
+	if (!background.data)
+		{
+			return -1;
+		}
 	// read the image paths from this file 
 	ifstream input("./paths.txt");
-	string astring;
-	getline(input, astring);
+	//string astring;
+	//getline(input, astring);
 	// save the output paths in this text file
 	ofstream writeoutfile("SavedImgPaths.txt");
 
@@ -121,12 +124,12 @@ int main()
 
 		if (!img.data)
 		{
-			continue;
+			return -2;
 		}
 
 		// find the center of the image
-		centering(img, 100, 5);
-		centering(background, 100, 5);
+		//centering(img, 30,5);
+		//centering(background, 30, 5);
 
 		//substract the background
 		absdiff(img, background, diff);
