@@ -29,7 +29,7 @@ void saveimg(cv::Mat img, Path imgsavepath, Path logsavepath, std::string suffix
 int main()
 {
 	//load the background image
-	Mat background = imread("C:\\Users\\hjalt\\Google Drev\\Uni\\P4 - Project\\project\\Pictures\\NormalPipeWhiteFull.png", 0);
+	Mat background = imread("C:\\Users\\hjalt\\Google Drev\\Uni\\P4 - Project\\project\\Pictures\\NormalPipeWhiteFull.png", 1);
 	if (!background.data){
 			return -1;
 		}
@@ -41,18 +41,15 @@ int main()
 	// path, filename and file extention when the images is saved.
 	for (Path pathName; getline(input, pathName.completepath);) {
 		// load the image from the pathname
-		Mat img = imread(pathName.completepath, 0);
-		
-		Mat diff = Mat(img.rows, img.cols, 0);
+		Mat img = imread(pathName.completepath, 1);
 		if (!img.data){
-			return -2;
+			continue;
 		}
+		Mat diff = Mat(img.rows, img.cols, 1);
+		
 
 		/// find the root
-		findRoot(img);
-
-		//substract the background
-		absdiff(img, background, diff);
+		diff = findRoot2(background,img);
 
 		// show the result. 
 		namedWindow("photo", CV_WINDOW_KEEPRATIO);
@@ -65,7 +62,7 @@ int main()
 	}
 
 	// wait a little and then close
-	cv::waitKey(2000);
+	cv::waitKey(0);
 	 
 	
 	return 0;
