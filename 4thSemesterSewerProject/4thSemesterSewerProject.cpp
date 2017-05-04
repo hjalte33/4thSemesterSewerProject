@@ -32,32 +32,30 @@ int main()
 	Mat background = imread("C:\\Users\\hjalt\\Google Drev\\Uni\\P4 - Project\\project\\Pictures\\NormalPipeWhiteFull.png", 1);
 	if (!background.data){
 			return -1;
-		}
+	}
 	// read the image paths from this file 
 	ifstream input("./paths.txt");
-
+	
+	namedWindow("photo", CV_WINDOW_KEEPRATIO);
 	// Go through each image in the path file.
 	// The Path struct is used here so it's easier to extract the
 	// path, filename and file extention when the images is saved.
 	for (Path pathName; getline(input, pathName.completepath);) {
 		// load the image from the pathname
 		Mat img = imread(pathName.completepath, 1);
-		if (!img.data){
+		if (!img.data){ // if the images is not loaded correctly, continue to the next one
 			continue;
 		}
-		Mat diff = Mat(img.rows, img.cols, 1);
 		
-
 		/// find the root
-		diff = findRoot2(background,img);
+		Mat result = findRoot3(background, img);
 
 		// show the result. 
-		namedWindow("photo", CV_WINDOW_KEEPRATIO);
-		imshow("photo", diff);
+		imshow("photo", result);
 		cv::waitKey(1);
 
 		/// save the result and save a log file at the same location. 
-		saveimg(diff, pathName, pathName);
+		saveimg(result, pathName, pathName,"_redonly");
 		
 	}
 

@@ -34,13 +34,129 @@ void centering(Mat src, int minRadius, int step = 2) {
 	//cout << shiftx << "  " << shifty << endl;   //debugging
 }
 
+Mat equalizeIntensity(const Mat& inputImage)
+{
+	if (inputImage.channels() >= 3)
+	{
+		Mat ycrcb;
+
+		cvtColor(inputImage, ycrcb, CV_BGR2YCrCb);
+
+		vector<Mat> channels;
+		split(ycrcb, channels);
+
+		equalizeHist(channels[0], channels[0]);
+
+		Mat result;
+		merge(channels, ycrcb);
+
+		cvtColor(ycrcb, result, CV_YCrCb2BGR);
+
+		return result;
+	}
+	return Mat();
+}
+
 
 //Find the root and returns an image with the result.
 Mat findRoot(cv::Mat background, cv::Mat src) {
 	//substract the background
+
 	Mat result;
-	absdiff(src, background, result);
+	Mat blured;
+	int kernelsize = 51;
+	//GaussianBlur(background,blured,Size(kernelsize,kernelsize),1);
+	//absdiff(src, blured, result);
+	Mat resultfiltered;
+	bilateralFilter(src, resultfiltered, 12, 50,50);
+	cvtColor(resultfiltered,resultfiltered, CV_BGR2GRAY);
+	Canny(resultfiltered, resultfiltered, 180, 75, 5);
+	return resultfiltered;
+}
+
+
+struct RGB {        //members are in "bgr" order!
+	uchar blue;
+	uchar green;
+	uchar red;
+};
+
+cv::Mat rgbToGray(cv::Mat src) {
+	Mat grayscale = Mat(src.rows, src.cols, CV_8U);
+	for (int row = 0; row < src.rows; row++) {
+		for (int col = 0; col < src.cols; col++) {
+			RGB& rgb = src.ptr<RGB>(row)[col]; //y = row, x = col
+			uchar& gray = grayscale.ptr<uchar>(row)[col];
+			//int brightness = (rgb.blue + rgb.green + rgb.red) / 3;
+			grayscale.ptr<uchar>(row)[col] = rgb.blue * 0.2 + rgb.green * 0.2 + rgb.red * 0.6;
+		}
+	}
+	return grayscale;
+}
+
+Mat getRedChannel(Mat inputImage) {
+	Mat bgr[3];
+	split(inputImage, bgr);
+	return bgr[2];
+}
+
+Mat findRoot3(cv::Mat& background, cv::Mat& src) {
+	Mat srcBW = getRedChannel(src);
+	Mat srcBWBlur = getRedChannel(src);
+	Mat backBWBlur = getRedChannel(background);
+	int kernalsize = 81;
+	//equalizeHist(srcBWBlur, srcBWBlur);
+	//equalizeHist(backBWBlur, backBWBlur);
+	GaussianBlur(backBWBlur, backBWBlur, Size(kernalsize, kernalsize), 10);
+	kernalsize = 41;
+	GaussianBlur(srcBW, srcBWBlur, Size(kernalsize, kernalsize), 10);
+	Mat mask;
+	absdiff(srcBWBlur, backBWBlur, mask);
+	
+	int elementsize = 20;
+	Mat element = getStructuringElement(0, Size(elementsize, elementsize));
+	morphologyEx(mask, mask, MORPH_OPEN, element);	
+	bitwise_not(mask, mask);
+	Mat result;
+	result = srcBW - mask;
+	
 	return result;
+
+}
+
+struct HSV {        //members are in "bgr" order!
+	uchar hue;
+	uchar satuation;
+	uchar value;
+};
+
+cv::Mat findRoot4(cv::Mat background, cv::Mat src) {
+	Mat src_gray;
+	Mat contours;
+	Mat dx, dy;
+	cv::Canny(src, contours, 10, 350);
+	cv::Sobel(src, dx, CV_64F, 1, 0, 3, 1, 0, cv::BORDER_REPLICATE);
+	cv::Sobel(src, dy, CV_64F, 0, 1, 3, 1, 0, cv::BORDER_REPLICATE);
+
+	// create and convert RGB image to HSV
+	cv::Mat angle(src.size(), CV_64F);
+	cvtColor(angle, angle, CV_BGR2HSV);
+
+	//for (int i = 0; i < contours.rows; i++) {
+	//	for (int j = 0; j < contours.cols; i++) {
+	//		HSV& ang = angle.ptr<HSV>(i)[j];
+	//		uchar& cont = contours.ptr<uchar>(i)[j];
+	//		if (contours.ptr<uchar>(i)[j] > 0) {
+	//			//angle.ptr<HSV>(i)[j].
+	//		}
+	//	}
+	//}
+
+	//	foreach(i, j) such that contours[i, j] > 0
+	//{
+	//	angle[i, j] = atan2(dy[i, j], dx[i, j])
+	//}
+	return src;
 }
 
 void findingContours(cv::Mat src) {
@@ -128,3 +244,5 @@ cv::Mat findRoot2(cv::Mat background, cv::Mat src){
 	findingContours(src);
 	return src;
 }
+
+

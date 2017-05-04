@@ -5,8 +5,8 @@ C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/RO Category/ROE4P1W
 C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/RO Category/ROE4P2W200.png
 C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/RO Category/ROE4P3W200.png
 C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/RO Category/ROE4R1.png
-C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/RO Category/ROE4R1B.png
-C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/RO Category/ROE4R1G.png
+**C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/RO Category/ROE4R1B.png
+**C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/RO Category/ROE4R1G.png
 C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/RO Category/ROE4R1R.png
 C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/RO Category/ROE4R2W.png
 C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/RO Category/ROE4R1W150.png
