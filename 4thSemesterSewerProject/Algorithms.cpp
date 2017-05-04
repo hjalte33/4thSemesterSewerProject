@@ -245,4 +245,37 @@ cv::Mat findRoot2(cv::Mat background, cv::Mat src){
 	return src;
 }
 
+Mat AlgorithmRoots(Mat backgroundImage, Mat inputImage) {
 
+	//Making the inputImage greyscale
+	Mat bgrInput[3];
+	split(inputImage, bgrInput);
+	inputImage = bgrInput[2];
+
+	//Making the inputImage greyscale
+	Mat bgrBackground[3];
+	split(backgroundImage, bgrBackground);
+	backgroundImage = bgrBackground[2];
+
+	//Blurring the background image for substracting
+	int KernelSize = 30;
+	blur(backgroundImage, backgroundImage, Size(KernelSize, KernelSize));
+
+	//Substracting the two images and save it to diff
+	Mat diff = inputImage - backgroundImage;
+
+	//Making the diff image binary
+	int threshold = 45;
+	for (int x = 0; x < diff.cols; x++) {
+		for (int y = 0; y < diff.rows; y++) {
+			if (diff.at<uchar>(Point(x, y)) < threshold) {
+				diff.at<uchar>(Point(x, y)) = 0;
+			}
+			else {
+				diff.at<uchar>(Point(x, y)) = 255;
+			}
+		}
+	}
+
+	return diff;
+}
