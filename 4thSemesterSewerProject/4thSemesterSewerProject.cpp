@@ -29,12 +29,12 @@ void saveimg(cv::Mat img, Path imgsavepath, Path logsavepath, std::string suffix
 int main()
 {
 	//load the background image
-	Mat background = imread("C:\\Users\\hjalt\\Google Drev\\Uni\\P4 - Project\\project\\Pictures\\NormalPipeWhiteFull.png", 1);
+	Mat background = imread("C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/New pictures/Normal pipe/N-R-F.jpg", 1);
 	if (!background.data){
 			return -1;
 	}
 	// read the image paths from this file 
-	ifstream input("./paths.txt");
+	ifstream input("./pathnew.txt");
 	
 	namedWindow("photo", CV_WINDOW_KEEPRATIO);
 	// Go through each image in the path file.
@@ -44,11 +44,12 @@ int main()
 		// load the image from the pathname
 		Mat img = imread(pathName.completepath, 1);
 		if (!img.data){ // if the images is not loaded correctly, continue to the next one
+			return -1;
 			continue;
 		}
 		
 		/// find the root
-		Mat result = findRoot3(background, img);
+		Mat result = AlgorithmRoots(background,img);
 
 		// show the result. 
 		imshow("photo", result);

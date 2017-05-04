@@ -21,7 +21,7 @@ cv::Mat rgbToGray(cv::Mat src);
 // Christoffers attempt
 cv::Mat findRoot2(cv::Mat background, cv::Mat src);
 
-cv::Mat AlgorithmRoots(Mat backgroundImage, Mat inputImage);
+cv::Mat AlgorithmRoots(cv::Mat backgroundImage, cv::Mat inputImage);
 
 cv::Mat findRoot3(cv::Mat & background, cv::Mat & src);
 

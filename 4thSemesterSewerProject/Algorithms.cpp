@@ -245,7 +245,7 @@ cv::Mat findRoot2(cv::Mat background, cv::Mat src){
 	return src;
 }
 
-Mat AlgorithmRoots(Mat backgroundImage, Mat inputImage) {
+cv::Mat AlgorithmRoots(cv::Mat backgroundImage, cv::Mat inputImage) {
 
 	//Making the inputImage greyscale
 	Mat bgrInput[3];
