@@ -57,6 +57,20 @@ Mat equalizeIntensity(const Mat& inputImage)
 	return Mat();
 }
 
+long int CountWhitePixels(cv::Mat inputImage) {
+	long int whitePixels = 0;
+
+	for (int x = 0; x < inputImage.cols; x++) {
+		for (int y = 0; y < inputImage.rows; y++) {
+			if (inputImage.at<uchar>(Point(x, y)) == 255) {
+				whitePixels++;
+			}
+		}
+	}
+
+	return whitePixels;
+}
+
 
 //Find the root and returns an image with the result.
 Mat findRoot(cv::Mat background, cv::Mat src) {
@@ -81,14 +95,16 @@ struct RGB {        //members are in "bgr" order!
 	uchar red;
 };
 
-cv::Mat rgbToGray(cv::Mat src, vector<CV_ weights) {
-	Mat grayscale = Mat(src.rows, src.cols, CV_8U);
+cv::Mat rgbToGray(cv::Mat src) {
+	Mat grayscale = Mat(src.rows, src.cols, 0);
+
 	for (int row = 0; row < src.rows; row++) {
 		for (int col = 0; col < src.cols; col++) {
 			RGB& rgb = src.ptr<RGB>(row)[col]; //y = row, x = col
 			uchar& gray = grayscale.ptr<uchar>(row)[col];
 			//int brightness = (rgb.blue + rgb.green + rgb.red) / 3;
-			grayscale.ptr<uchar>(row)[col] = rgb.blue * 0.2 + rgb.green * 0.2 + rgb.red * 0.6;
+			
+			grayscale.ptr<uchar>(row)[col] = rgb.blue * 0.3 + rgb.green * 0.7 + rgb.red * 0;
 		}
 	}
 	return grayscale;
@@ -219,30 +235,30 @@ cv::Mat findRoot2(cv::Mat background, cv::Mat src){
 
 cv::Mat AlgorithmRoots(cv::Mat backgroundImage, cv::Mat inputImage, std::string filename = "name") {
 
-	Mat bgrBackground
-	split(backgroundImage, bgrBackground);
-	backgroundImage = bgrBackground[2];
+	Mat newBackgroundImage = rgbToGray(backgroundImage.clone());
+	inputImage = rgbToGray(inputImage);
+
 
 	//Blurring the background image for substracting
 	int KernelSize = 30;
-	blur(backgroundImage, backgroundImage, Size(KernelSize, KernelSize));
+	blur(newBackgroundImage, newBackgroundImage, Size(KernelSize, KernelSize));
 
 	//Substracting the two images and save it to diff
-	Mat diff = inputImage - backgroundImage;
+	Mat diff = inputImage - newBackgroundImage;
 
 	//Making the diff image binary
 	threshold(diff, diff, 45, 255, THRESH_BINARY);
 	vector<vector<Point>> contours;
 	findContours(diff, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-	cvtColor(diff, diff, CV_GRAY2BGR);
+
 	Mat colour = Mat(diff.rows, diff.cols, CV_8UC3);
 
 	double length = 0;
-	double area = 0;
+	long int area = CountWhitePixels(diff);
 	for (int i = 0; i < contours.size(); i++) {
 		if (arcLength(contours[i], false) > 50) {
 			drawContours(colour, contours, i, (255, 255, 0), FILLED);
-			area += contourArea(contours[i]);
+			//area += contourArea(contours[i]);
 			length += arcLength(contours[i], false);
 		}
 	}
@@ -255,19 +271,5 @@ cv::Mat AlgorithmRoots(cv::Mat backgroundImage, cv::Mat inputImage, std::string 
 	return colour;
 }
 
-<<<<<<< HEAD
-=======
-long int CountWhitePixels(cv::Mat inputImage) {
-	long int whitePixels = 0;
 
-	for (int x = 0; x < inputImage.cols; x++) {
-		for (int y = 0; y < inputImage.rows; y++) {
-			if (inputImage.at<uchar>(Point(x, y)) == 255) {
-				whitePixels++;
-			}
-		}
-	}
-	
-	return whitePixels;
-}
->>>>>>> a113b9ecc7cd0072f3bb2562a6aa0ebd4f11054f
+

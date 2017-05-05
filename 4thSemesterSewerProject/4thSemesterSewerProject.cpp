@@ -45,12 +45,9 @@ int main()
 	for (Path pathName; getline(input, pathName.completepath);) {
 		// load the image from the pathname
 		Mat img = imread(pathName.completepath, 1);
-<<<<<<< HEAD
+
 		if (!img.data) { // if the images is not loaded correctly, continue to the next one
-			int skiped++;
-=======
-		if (!img.data){ // if the images is not loaded correctly, continue to the next one
->>>>>>> a113b9ecc7cd0072f3bb2562a6aa0ebd4f11054f
+			skiped++;
 			continue;
 		}
 
@@ -62,12 +59,8 @@ int main()
 		cv::waitKey(1);
 
 		/// save the result and save a log file at the same location. 
-		saveimg(result, pathName, pathName, "ChrisPictures");
-		long int numberOfWhitePixels = 0;
+		saveimg(result, pathName, pathName);
 
-		numberOfWhitePixels = CountWhitePixels(result);
-
-		cout << "number of white pixels: " << numberOfWhitePixels << endl;
 		
 	}
 
