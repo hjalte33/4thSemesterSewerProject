@@ -29,12 +29,12 @@ void saveimg(cv::Mat img, Path imgsavepath, Path logsavepath, std::string suffix
 int main()
 {
 	//load the background image
-	Mat background = imread("C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/New pictures/Normal pipe/N-R-F.jpg", 1);
+	Mat background = imread("C:/Users/Christoffer/Google Drev/P4 - Project/project/Pictures/New pictures/Normal pipe/N-R-F.jpg", 1);
 	if (!background.data){
 			return -1;
 	}
 	// read the image paths from this file 
-	ifstream input("./pathnew.txt");
+	ifstream input("C:/Users/Christoffer/Documents/Visual Studio 2015/Projects/4thSemesterSewerProject/4thSemesterSewerProject/ChrisPath.txt");
 	
 	namedWindow("photo", CV_WINDOW_KEEPRATIO);
 	// Go through each image in the path file.
@@ -44,7 +44,6 @@ int main()
 		// load the image from the pathname
 		Mat img = imread(pathName.completepath, 1);
 		if (!img.data){ // if the images is not loaded correctly, continue to the next one
-			return -1;
 			continue;
 		}
 		
@@ -56,7 +55,12 @@ int main()
 		cv::waitKey(1);
 
 		/// save the result and save a log file at the same location. 
-		saveimg(result, pathName, pathName,"_redonly");
+		saveimg(result, pathName, pathName, "ChrisPictures");
+		long int numberOfWhitePixels = 0;
+
+		numberOfWhitePixels = CountWhitePixels(result);
+
+		cout << "number of white pixels: " << numberOfWhitePixels << endl;
 		
 	}
 
