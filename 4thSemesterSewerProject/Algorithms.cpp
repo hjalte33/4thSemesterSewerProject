@@ -279,3 +279,17 @@ cv::Mat AlgorithmRoots(cv::Mat backgroundImage, cv::Mat inputImage) {
 
 	return diff;
 }
+
+long int CountWhitePixels(cv::Mat inputImage) {
+	long int whitePixels = 0;
+
+	for (int x = 0; x < inputImage.cols; x++) {
+		for (int y = 0; y < inputImage.rows; y++) {
+			if (inputImage.at<uchar>(Point(x, y)) == 255) {
+				whitePixels++;
+			}
+		}
+	}
+	
+	return whitePixels;
+}
