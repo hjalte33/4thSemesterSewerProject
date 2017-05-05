@@ -31,7 +31,7 @@ int main()
 	//number of image path skipped because of some error
 	int skiped = 0;
 	//load the background image
-	Mat background = imread("C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/New pictures/Normal pipe/N-R-F.jpg", 1);
+	Mat background = imread("C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/New pictures/Normal pipe/N-W-F.jpg", 1);
 	if (!background.data){
 			return -1;
 	}
@@ -48,6 +48,7 @@ int main()
 
 		if (!img.data) { // if the images is not loaded correctly, continue to the next one
 			skiped++;
+			cout << "skiped " << pathName.completepath << endl;
 			continue;
 		}
 
@@ -65,7 +66,7 @@ int main()
 	}
 
 	// wait a little and then close
-	cout << endl << "NUMBER OF IMAGES SKIPPED IN THE PATH FILE: " << skiped;
+	cout << endl << "I skiped " << skiped << " images";
 	cv::waitKey(0);
 	 
 	

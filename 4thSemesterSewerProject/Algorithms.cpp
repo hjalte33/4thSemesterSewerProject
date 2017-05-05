@@ -104,7 +104,7 @@ cv::Mat rgbToGray(cv::Mat src) {
 			uchar& gray = grayscale.ptr<uchar>(row)[col];
 			//int brightness = (rgb.blue + rgb.green + rgb.red) / 3;
 			
-			grayscale.ptr<uchar>(row)[col] = rgb.blue * 0.3 + rgb.green * 0.7 + rgb.red * 0;
+			grayscale.ptr<uchar>(row)[col] = rgb.blue * 0 + rgb.green * 0 + rgb.red * 1;
 		}
 	}
 	return grayscale;
@@ -237,7 +237,9 @@ cv::Mat AlgorithmRoots(cv::Mat backgroundImage, cv::Mat inputImage, std::string 
 
 	Mat newBackgroundImage = rgbToGray(backgroundImage.clone());
 	inputImage = rgbToGray(inputImage);
-
+	namedWindow("input", WINDOW_KEEPRATIO);
+	imshow("input", inputImage);
+	waitKey(1);
 
 	//Blurring the background image for substracting
 	int KernelSize = 30;
@@ -251,13 +253,13 @@ cv::Mat AlgorithmRoots(cv::Mat backgroundImage, cv::Mat inputImage, std::string 
 	vector<vector<Point>> contours;
 	findContours(diff, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 
-	Mat colour = Mat(diff.rows, diff.cols, CV_8UC3);
+	Mat color = Mat(diff.rows, diff.cols, CV_8UC3);
 
 	double length = 0;
 	long int area = CountWhitePixels(diff);
 	for (int i = 0; i < contours.size(); i++) {
 		if (arcLength(contours[i], false) > 50) {
-			drawContours(colour, contours, i, (255, 255, 0), FILLED);
+			drawContours(color, contours, i, (255, 255, 0),3);
 			//area += contourArea(contours[i]);
 			length += arcLength(contours[i], false);
 		}
@@ -268,7 +270,7 @@ cv::Mat AlgorithmRoots(cv::Mat backgroundImage, cv::Mat inputImage, std::string 
 	}*/
 
 
-	return colour;
+	return color;
 }
 
 
