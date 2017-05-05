@@ -29,12 +29,12 @@ void saveimg(cv::Mat img, Path imgsavepath, Path logsavepath, std::string suffix
 int main()
 {
 	//load the background image
-	Mat background = imread("C:/Users/hjalt/Google Drev/P4 - Project/project/Pictures/New pictures/Normal pipe/N-R-F.jpg", 1);
+	Mat background = imread("C:/Users/hjalt/Google Drev/uni/P4 - Project/project/Pictures/New pictures/Normal pipe/N-R-F.jpg", 1);
 	if (!background.data){
 			return -1;
 	}
 	// read the image paths from this file 
-	ifstream input("./newpath.txt");
+	ifstream input("./pathnew.txt");
 	
 	namedWindow("photo", CV_WINDOW_KEEPRATIO);
 	// Go through each image in the path file.
