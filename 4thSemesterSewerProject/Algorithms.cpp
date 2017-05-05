@@ -81,7 +81,7 @@ struct RGB {        //members are in "bgr" order!
 	uchar red;
 };
 
-cv::Mat rgbToGray(cv::Mat src) {
+cv::Mat rgbToGray(cv::Mat src, vector<CV_ weights) {
 	Mat grayscale = Mat(src.rows, src.cols, CV_8U);
 	for (int row = 0; row < src.rows; row++) {
 		for (int col = 0; col < src.cols; col++) {
@@ -130,34 +130,6 @@ struct HSV {        //members are in "bgr" order!
 	uchar value;
 };
 
-cv::Mat findRoot4(cv::Mat background, cv::Mat src) {
-	Mat src_gray;
-	Mat contours;
-	Mat dx, dy;
-	cv::Canny(src, contours, 10, 350);
-	cv::Sobel(src, dx, CV_64F, 1, 0, 3, 1, 0, cv::BORDER_REPLICATE);
-	cv::Sobel(src, dy, CV_64F, 0, 1, 3, 1, 0, cv::BORDER_REPLICATE);
-
-	// create and convert RGB image to HSV
-	cv::Mat angle(src.size(), CV_64F);
-	cvtColor(angle, angle, CV_BGR2HSV);
-
-	//for (int i = 0; i < contours.rows; i++) {
-	//	for (int j = 0; j < contours.cols; i++) {
-	//		HSV& ang = angle.ptr<HSV>(i)[j];
-	//		uchar& cont = contours.ptr<uchar>(i)[j];
-	//		if (contours.ptr<uchar>(i)[j] > 0) {
-	//			//angle.ptr<HSV>(i)[j].
-	//		}
-	//	}
-	//}
-
-	//	foreach(i, j) such that contours[i, j] > 0
-	//{
-	//	angle[i, j] = atan2(dy[i, j], dx[i, j])
-	//}
-	return src;
-}
 
 void findingContours(cv::Mat src) {
 	vector<vector<Point>> contours;
@@ -245,15 +217,9 @@ cv::Mat findRoot2(cv::Mat background, cv::Mat src){
 	return src;
 }
 
-cv::Mat AlgorithmRoots(cv::Mat backgroundImage, cv::Mat inputImage) {
+cv::Mat AlgorithmRoots(cv::Mat backgroundImage, cv::Mat inputImage, std::string filename = "name") {
 
-	//Making the inputImage greyscale
-	Mat bgrInput[3];
-	split(inputImage, bgrInput);
-	inputImage = bgrInput[2];
-
-	//Making the inputImage greyscale
-	Mat bgrBackground[3];
+	Mat bgrBackground
 	split(backgroundImage, bgrBackground);
 	backgroundImage = bgrBackground[2];
 
@@ -265,17 +231,27 @@ cv::Mat AlgorithmRoots(cv::Mat backgroundImage, cv::Mat inputImage) {
 	Mat diff = inputImage - backgroundImage;
 
 	//Making the diff image binary
-	int threshold = 45;
-	for (int x = 0; x < diff.cols; x++) {
-		for (int y = 0; y < diff.rows; y++) {
-			if (diff.at<uchar>(Point(x, y)) < threshold) {
-				diff.at<uchar>(Point(x, y)) = 0;
-			}
-			else {
-				diff.at<uchar>(Point(x, y)) = 255;
-			}
+	threshold(diff, diff, 45, 255, THRESH_BINARY);
+	vector<vector<Point>> contours;
+	findContours(diff, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+	cvtColor(diff, diff, CV_GRAY2BGR);
+	Mat colour = Mat(diff.rows, diff.cols, CV_8UC3);
+
+	double length = 0;
+	double area = 0;
+	for (int i = 0; i < contours.size(); i++) {
+		if (arcLength(contours[i], false) > 50) {
+			drawContours(colour, contours, i, (255, 255, 0), FILLED);
+			area += contourArea(contours[i]);
+			length += arcLength(contours[i], false);
 		}
 	}
+	cout << filename << " arcLength " << length << " Area " << area << " Ratio area/length " << area/length << endl;
+	/*for (int i = 0; i < contours.size; i++) {
+		for (int j = 0; j<)
+	}*/
 
-	return diff;
+
+	return colour;
 }
+

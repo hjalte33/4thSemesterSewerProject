@@ -28,6 +28,8 @@ void saveimg(cv::Mat img, Path imgsavepath, Path logsavepath, std::string suffix
 
 int main()
 {
+	//number of image path skipped because of some error
+	int skiped = 0;
 	//load the background image
 	Mat background = imread("C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/New pictures/Normal pipe/N-R-F.jpg", 1);
 	if (!background.data){
@@ -43,13 +45,13 @@ int main()
 	for (Path pathName; getline(input, pathName.completepath);) {
 		// load the image from the pathname
 		Mat img = imread(pathName.completepath, 1);
-		if (!img.data){ // if the images is not loaded correctly, continue to the next one
-			return -1;
+		if (!img.data) { // if the images is not loaded correctly, continue to the next one
+			int skiped++;
 			continue;
 		}
-		
+
 		/// find the root
-		Mat result = AlgorithmRoots(background,img);
+		Mat result = AlgorithmRoots(background, img, pathName.filename());
 
 		// show the result. 
 		imshow("photo", result);
@@ -61,6 +63,7 @@ int main()
 	}
 
 	// wait a little and then close
+	cout << endl << "NUMBER OF IMAGES SKIPPED IN THE PATH FILE: " << skiped;
 	cv::waitKey(0);
 	 
 	
