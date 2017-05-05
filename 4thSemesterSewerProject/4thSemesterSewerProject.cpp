@@ -29,7 +29,7 @@ void saveimg(cv::Mat img, Path imgsavepath, Path logsavepath, std::string suffix
 int main()
 {
 	//load the background image
-	Mat background = imread("C:/Users/hjalt/Google Drev/uni/P4 - Project/project/Pictures/New pictures/Normal pipe/N-R-F.jpg", 1);
+	Mat background = imread("C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/New pictures/Normal pipe/N-R-F.jpg", 1);
 	if (!background.data){
 			return -1;
 	}
