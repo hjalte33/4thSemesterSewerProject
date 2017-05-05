@@ -34,28 +34,7 @@ void centering(Mat src, int minRadius, int step = 2) {
 	//cout << shiftx << "  " << shifty << endl;   //debugging
 }
 
-Mat equalizeIntensity(const Mat& inputImage)
-{
-	if (inputImage.channels() >= 3)
-	{
-		Mat ycrcb;
 
-		cvtColor(inputImage, ycrcb, CV_BGR2YCrCb);
-
-		vector<Mat> channels;
-		split(ycrcb, channels);
-
-		equalizeHist(channels[0], channels[0]);
-
-		Mat result;
-		merge(channels, ycrcb);
-
-		cvtColor(ycrcb, result, CV_YCrCb2BGR);
-
-		return result;
-	}
-	return Mat();
-}
 
 long int CountWhitePixels(cv::Mat inputImage) {
 	long int whitePixels = 0;
@@ -104,7 +83,7 @@ cv::Mat rgbToGray(cv::Mat src) {
 			uchar& gray = grayscale.ptr<uchar>(row)[col];
 			//int brightness = (rgb.blue + rgb.green + rgb.red) / 3;
 			
-			grayscale.ptr<uchar>(row)[col] = rgb.blue * 0 + rgb.green * 0 + rgb.red * 1;
+			grayscale.ptr<uchar>(row)[col] = rgb.blue * 1 + rgb.green * 0 + rgb.red * 0;
 		}
 	}
 	return grayscale;
@@ -115,37 +94,6 @@ Mat getRedChannel(Mat inputImage) {
 	split(inputImage, bgr);
 	return bgr[2];
 }
-
-Mat findRoot3(cv::Mat& background, cv::Mat& src) {
-	Mat srcBW = getRedChannel(src);
-	Mat srcBWBlur = getRedChannel(src);
-	Mat backBWBlur = getRedChannel(background);
-	int kernalsize = 81;
-	//equalizeHist(srcBWBlur, srcBWBlur);
-	//equalizeHist(backBWBlur, backBWBlur);
-	GaussianBlur(backBWBlur, backBWBlur, Size(kernalsize, kernalsize), 10);
-	kernalsize = 41;
-	GaussianBlur(srcBW, srcBWBlur, Size(kernalsize, kernalsize), 10);
-	Mat mask;
-	absdiff(srcBWBlur, backBWBlur, mask);
-	
-	int elementsize = 20;
-	Mat element = getStructuringElement(0, Size(elementsize, elementsize));
-	morphologyEx(mask, mask, MORPH_OPEN, element);	
-	bitwise_not(mask, mask);
-	Mat result;
-	result = srcBW - mask;
-	
-	return result;
-
-}
-
-struct HSV {        //members are in "bgr" order!
-	uchar hue;
-	uchar satuation;
-	uchar value;
-};
-
 
 void findingContours(cv::Mat src) {
 	vector<vector<Point>> contours;
@@ -209,7 +157,6 @@ void findingContours(cv::Mat src) {
 
 }
 
-
 cv::Mat findRoot2(cv::Mat background, cv::Mat src){
 
 	int kernelSize = 30;
@@ -237,41 +184,42 @@ cv::Mat AlgorithmRoots(cv::Mat backgroundImage, cv::Mat inputImage, std::string 
 
 	Mat newBackgroundImage = rgbToGray(backgroundImage.clone());
 	inputImage = rgbToGray(inputImage);
-	namedWindow("input", WINDOW_KEEPRATIO);
-	imshow("input", inputImage);
+	
 	waitKey(1);
 
 	//Blurring the background image for substracting
-	int KernelSize = 30;
+	int KernelSize = 80;
 	blur(newBackgroundImage, newBackgroundImage, Size(KernelSize, KernelSize));
 
 	//Substracting the two images and save it to diff
 	Mat diff = inputImage - newBackgroundImage;
 
 	//Making the diff image binary
-	threshold(diff, diff, 45, 255, THRESH_BINARY);
+	threshold(diff, diff, 100, 255, CV_THRESH_TOZERO);
+namedWindow("input", WINDOW_KEEPRATIO);
+	imshow("input", diff);
+	
+	/// evaluate the binarry image
 	vector<vector<Point>> contours;
 	findContours(diff, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 
 	Mat color = Mat(diff.rows, diff.cols, CV_8UC3);
-
 	double length = 0;
 	long int area = CountWhitePixels(diff);
 	for (int i = 0; i < contours.size(); i++) {
 		if (arcLength(contours[i], false) > 50) {
-			drawContours(color, contours, i, (255, 255, 0),3);
+			drawContours(color, contours, i, (255, 255, 0), 3);
 			//area += contourArea(contours[i]);
 			length += arcLength(contours[i], false);
 		}
 	}
-	cout << filename << " arcLength " << length << " Area " << area << " Ratio area/length " << area/length << endl;
-	/*for (int i = 0; i < contours.size; i++) {
-		for (int j = 0; j<)
-	}*/
+	cout << filename << " arcLength " << length << " Area " << area << " Ratio area/length " << area / length << endl;
+
 
 
 	return color;
 }
+
 
 
 
