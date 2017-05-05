@@ -23,5 +23,7 @@ cv::Mat findRoot2(cv::Mat background, cv::Mat src);
 
 cv::Mat AlgorithmRoots(cv::Mat backgroundImage, cv::Mat inputImage, std::string filename);
 
+long int CountWhitePixels(cv::Mat inputImage);
+
 cv::Mat findRoot3(cv::Mat & background, cv::Mat & src);
 

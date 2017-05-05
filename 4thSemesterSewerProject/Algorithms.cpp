@@ -255,3 +255,19 @@ cv::Mat AlgorithmRoots(cv::Mat backgroundImage, cv::Mat inputImage, std::string 
 	return colour;
 }
 
+<<<<<<< HEAD
+=======
+long int CountWhitePixels(cv::Mat inputImage) {
+	long int whitePixels = 0;
+
+	for (int x = 0; x < inputImage.cols; x++) {
+		for (int y = 0; y < inputImage.rows; y++) {
+			if (inputImage.at<uchar>(Point(x, y)) == 255) {
+				whitePixels++;
+			}
+		}
+	}
+	
+	return whitePixels;
+}
+>>>>>>> a113b9ecc7cd0072f3bb2562a6aa0ebd4f11054f
