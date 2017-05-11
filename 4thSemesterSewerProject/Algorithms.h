@@ -1,29 +1,62 @@
-#pragma once
+#ifndef ALGORITHMS_H
+#define ALGORITHMS_H
 
-#include "stdafx.h"
-#include "Path.h"
+#include "opencv2\core.hpp"
 
-// Translate an image in x and y
-void translateImg(cv::Mat img, int offsetx, int offsety);
+using namespace cv;
+using namespace std;
 
-/* Tries to find the smallest cirkle bigger than minRadius
-and then center the image at that */
-void centering(cv::Mat src, int minRadius, int step = 2);
+void translateImg(Mat img, int offsetx, int offsety);
+
+long int CountPixelBrightness(Mat inputImage);
+
+long int CountWhitePixels(Mat inputImage);
+
+Mat rgbToGray(Mat src, float red, float green, float blue);
+
+Mat rgbToGray(Mat src, int channel);
+
+Mat subtractRef(Mat inputImage, Mat ref);
+
+int getThresh(Mat inputImage);
+
+Mat areaThresh(Mat inputImage);
+
+void showImages(Mat image1, Mat image2, Mat image3, Size size, int waitkey);
 
 
-void findingContours(cv::Mat src);
+// ------------------------------------------------------------------------
+// ------------------- Segmentation functions -----------------------------
+// ------------------------------------------------------------------------
 
-// not yet implemented
-cv::Mat findRoot(cv::Mat background, cv::Mat src);
+Mat ROESegmentation(Mat src, Mat refImage);
 
-cv::Mat rgbToGray(cv::Mat src);
+Mat FSSegmentation(Mat src, Mat refImage);
 
-// Christoffers attempt
-cv::Mat findRoot2(cv::Mat background, cv::Mat src);
+Mat RBSegmentation(Mat src, Mat refImage);
 
-cv::Mat AlgorithmRoots(cv::Mat backgroundImage, cv::Mat inputImage, std::string filename);
 
-long int CountWhitePixels(cv::Mat inputImage);
 
-cv::Mat findRoot3(cv::Mat & background, cv::Mat & src);
 
+// ------------------------------------------------------------------------
+// -------------------- Classification functions --------------------------
+// ------------------------------------------------------------------------
+
+long int getAreaFeature(Mat inputImage);
+
+long int getArclengthFeature(Mat inputImage);
+
+double getShapeVariance(Mat inputImage, int pd);
+
+double AverageAngleChange(Mat inputImage, int pd);
+
+double PerimeterToAreaRatio(Mat inputImage);
+
+double boundBoxAspectRatio(Mat inputImage);
+
+float getDistToCenter(Mat inputImage);
+
+float AverageColourIntensity(Mat inputImage, Mat originalImage, int Channel);
+
+
+#endif
