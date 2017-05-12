@@ -15,6 +15,21 @@ void translateImg(Mat img, int offsetx, int offsety) {
 	warpAffine(img, img, trans_mat, img.size());
 }
 
+void showImages(Mat image1, Mat image2, Mat image3, Size size, int waitkey) {
+
+	resize(image1, image1, size);
+	resize(image2, image2, size);
+	resize(image3, image3, size);
+
+
+	imshow("Image 1", image1);
+	imshow("Image 2", image2);
+	imshow("Image 3", image3);
+
+	waitKey(waitkey);
+
+}
+
 long int CountPixelBrightness(cv::Mat inputImage) {
 	long int brightness = 0;
 
@@ -126,21 +141,37 @@ Mat areaThresh(Mat inputImage) {
 }
 
 
-void showImages(Mat image1, Mat image2, Mat image3, Size size, int waitkey) {
+/// Find contours twice to remove the middle cirkle of the image.
+Mat findContours1(Mat inputImage) {
 
-	resize(image1, image1, size);
-	resize(image2, image2, size);
-	resize(image3, image3, size);
+	vector<vector<Point>> contours;
+	findContours(inputImage, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
+	RNG rng(12345);
 
-	imshow("Image 1", image1);
-	imshow("Image 2", image2);
-	imshow("Image 3", image3);
+	/// Approximate contours to polygons + get bounding rects and circles	
+	vector<vector<Point> > contours_poly(contours.size());
+	vector<Rect> boundRect(contours.size());
+	vector<Point2f>center(contours.size());
+	vector<float>radius(contours.size());
+	float areaPrev = 0;
+	int biggestCirkleIndex = 0;
+	for (int i = 0; i < contours.size(); i++) {
+		approxPolyDP(Mat(contours[i]), contours_poly[i], 3, true);
+		minEnclosingCircle((Mat)contours_poly[i], center[i], radius[i]);
+		float circleArea = M_PI * radius[i] * radius[i];
+		if (circleArea < areaPrev) {
+			drawContours(inputImage, contours, i, Scalar(0), -1);
+		}
+		else {
+			areaPrev = circleArea;
+			drawContours(inputImage, contours, biggestCirkleIndex, Scalar(0), -1);
+			biggestCirkleIndex = i;
+		}
+	}
 
-	waitKey(waitkey);
-
+	return (inputImage);
 }
-
 
 
 // ------------------------------------------------------------------------
@@ -162,17 +193,27 @@ Mat ROESegmentation(Mat src, Mat refImage) {
 
 	//Making the diff image binary
 	threshold(diff, diff, 120, 255, CV_THRESH_TOZERO);
-
+	namedWindow("ROE", WINDOW_KEEPRATIO);
+	imshow("ROE", diff);
+	waitKey(1);
 	return diff;
 }
 
 Mat FSSegmentation(Mat src, Mat refImage) {
-	Mat image = rgbToGray(refImage, 0);
-	Mat ref;
 
-	//Some segmentation here
+	Mat redImage = rgbToGray(src,1,0,0); // 
+	equalizeHist(redImage, redImage);
+	threshold(redImage, redImage, 60, 255, THRESH_BINARY_INV);
+	
+	Mat elementOpen = getStructuringElement(MORPH_RECT, Size(8, 8));
+	morphologyEx(redImage, redImage, MORPH_OPEN, elementOpen);
 
-	return image;
+	Mat contours1 = findContours1(redImage);
+	namedWindow("FS", WINDOW_KEEPRATIO);
+	imshow("FS", contours1);
+	waitKey(1);
+	return contours1;
+	//Mat convexImage = findconvex(contours1);
 }
 
 Mat RBSegmentation(Mat src, Mat refImage) {
@@ -189,7 +230,9 @@ Mat RBSegmentation(Mat src, Mat refImage) {
 	threshold(image, image, thresval * 11, 255, THRESH_BINARY);
 
 	image = areaThresh(image);
-
+	namedWindow("RB", WINDOW_KEEPRATIO);
+	imshow("RB", image);
+	waitKey(1);
 	return image;
 }
 
@@ -214,10 +257,8 @@ long int getAreaFeature(Mat inputImage) {
 		area = contourArea(contours[i]);
 		if (area > lastarea) {
 			areaKeep = contourArea(contours[i]);
-
 			lastarea = area;
 		}
-
 	}
 
 	return areaKeep;
@@ -239,7 +280,6 @@ long int getArclengthFeature(Mat inputImage) {
 
 			lastArclength = arclength;
 		}
-
 	}
 
 
@@ -251,12 +291,15 @@ double getShapeVariance(Mat inputImage, int pd) {
 	vector<vector<Point>> contours;
 	findContours(inputImage, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
-	if (contours.size() < 2) return -1;
+	if (contours.size() < 1) return 0;
 
 	int b = 0;
-	for (int i = 1; i < contours.size(); i++) {
-		if (contours[i].size() > contours[i - 1].size()) {
-			b = i;
+	if (contours.size() > 1)
+	{
+		for (int i = 1; i < contours.size(); i++) {
+			if (contours[i].size() > contours[i - 1].size()) {
+				b = i;
+			}
 		}
 	}
 
@@ -343,12 +386,15 @@ double AverageAngleChange(Mat inputImage, int pd) {
 	vector<vector<Point>> contours;
 	findContours(inputImage, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 
-	if (contours.size() < 2) return -1;
+	if (contours.size() < 1) return 0;
 
 	int b = 0;
-	for (int i = 1; i < contours.size(); i++) {
-		if (contours[i].size() > contours[i - 1].size()) {
-			b = i;
+	if (contours.size() > 1)
+	{
+		for (int i = 1; i < contours.size(); i++) {
+			if (contours[i].size() > contours[i - 1].size()) {
+				b = i;
+			}
 		}
 	}
 
@@ -395,16 +441,17 @@ double AverageAngleChange(Mat inputImage, int pd) {
 double PerimeterToAreaRatio(Mat inputImage) {
 	vector<vector<Point>> contours;
 	findContours(inputImage, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-
-	if (contours.size() < 2) return -1;
-
+	
+	if (contours.size() < 1) return 0;
 	int b = 0;
-	for (int i = 1; i < contours.size(); i++) {
-		if (contours[i].size() > contours[i - 1].size()) {
-			b = i;
+	if (contours.size() > 1)
+	{	
+		for (int i = 1; i < contours.size(); i++) {
+			if (contours[i].size() > contours[i - 1].size()) {
+				b = i;
+			}
 		}
 	}
-
 
 	double Ratio = 0;
 	if ((arcLength(contours[b], false) == 0) || (contourArea(contours[b], false) == 0))
@@ -420,12 +467,13 @@ double boundBoxAspectRatio(Mat inputImage) {
 	vector<vector<Point>> contours;
 	findContours(inputImage, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 
-	if (contours.size() < 2) return -1;
-
+	if (contours.size() < 1) return 0;
 	int b = 0;
-	for (int i = 1; i < contours.size(); i++) {
-		if (contours[i].size() > contours[i - 1].size()) {
-			b = i;
+	if (contours.size() > 1){
+		for (int i = 1; i < contours.size(); i++) {
+			if (contours[i].size() > contours[i - 1].size()) {
+				b = i;
+			}
 		}
 	}
 
@@ -449,11 +497,11 @@ float getDistToCenter(Mat inputImage) {
 	bool whiteState = false;
 
 
-	for (int x = 0; x < inputImage.cols + 3; x = x + 445) {
-		for (int y = 0; y < inputImage.rows + 3; y = y + 334) {
+	for (int x = 0; x < inputImage.cols; x = x + 444) {
+		for (int y = 0; y < inputImage.rows; y = y + 333) {
 
-			for (int xb = x; xb < x + 444; xb++) {
-				for (int yb = y; yb < y + 333; yb++) {
+			for (int xb = x; xb < x + 443; xb++) {
+				for (int yb = y; yb < y + 332; yb++) {
 					if (inputImage.at<uchar>(yb, xb) == 255) {
 						whiteState = true;
 					}

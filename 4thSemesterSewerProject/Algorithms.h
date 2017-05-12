@@ -8,6 +8,8 @@ using namespace std;
 
 void translateImg(Mat img, int offsetx, int offsety);
 
+void showImages(Mat image1, Mat image2, Mat image3, Size size, int waitkey);
+
 long int CountPixelBrightness(Mat inputImage);
 
 long int CountWhitePixels(Mat inputImage);
@@ -22,14 +24,13 @@ int getThresh(Mat inputImage);
 
 Mat areaThresh(Mat inputImage);
 
-void showImages(Mat image1, Mat image2, Mat image3, Size size, int waitkey);
-
-
 // ------------------------------------------------------------------------
 // ------------------- Segmentation functions -----------------------------
 // ------------------------------------------------------------------------
 
 Mat ROESegmentation(Mat src, Mat refImage);
+
+Mat findContours1(Mat inputImage);
 
 Mat FSSegmentation(Mat src, Mat refImage);
 
