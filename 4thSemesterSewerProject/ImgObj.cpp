@@ -57,21 +57,27 @@ void ImgObj::calculateScores() {
 	if (!isImagesLoaded) {
 		readImages();
 	}
-	//Features FSFeaturs = Features(FSSegmentation(src, ref), src);
-	Features ROEFeaturs = Features(ROESegmentation(src, ref), src);
-	Features RBFeaturs = Features(RBSegmentation(src, ref), src);
+	namedWindow("working on", WINDOW_KEEPRATIO);
+	imshow("working on", src);
+	waitKey(1);
+
+	Features FSFeaturs = Features("FS"  , FSSegmentation(src, ref) , src);
+	Features ROEFeaturs = Features("ROE", ROESegmentation(src, ref), src);
+	Features RBFeaturs = Features("RB"  , RBSegmentation(src, ref) , src);
+
 
 	cout << "Image name " << srcPath.filename() << endl;
-	cout << "ROE features " << endl;
 	ROEFeaturs.coutData();
-	cout << "\nRB features " << endl;
 	RBFeaturs.coutData();
+	FSFeaturs.coutData();
+
 	//here it should mach with training data. 
 
 }
 
 
-ImgObj::Features::Features(cv::Mat input, cv::Mat orgSrc) {
+ImgObj::Features::Features(std::string _name, cv::Mat input, cv::Mat orgSrc) {
+	name = _name;
 	area = getAreaFeature(input);
 	arclength = getArclengthFeature(input);
 	shapeVariance = getShapeVariance(input, 10);
@@ -82,8 +88,13 @@ ImgObj::Features::Features(cv::Mat input, cv::Mat orgSrc) {
 	AvgColourOrigImg = AverageColourIntensity(input, orgSrc, 0);
 }
 
+void ImgObj::Features::writeFeaturesToFile() {
+
+}
+
 void ImgObj::Features::coutData() {
 	//Cout vars
+	cout << name << " category" << endl;
 	cout << "Area of issue: " << area << endl;
 	cout << "Arclengths of issue: " << arclength << endl;
 	cout << "Shape variance of issue: " << shapeVariance << endl;

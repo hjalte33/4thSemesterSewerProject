@@ -20,7 +20,9 @@ private:
 	}scores;
 
 	struct Features {
-		Features(cv::Mat input, cv::Mat orgSrc);
+		Features(std::string _name, cv::Mat input, cv::Mat orgSrc);
+		
+		std::string name;
 		long int area;
 		long int arclength;
 		float shapeVariance;
@@ -29,6 +31,8 @@ private:
 		float BoundBoxAspRatio;
 		float distFromCenter;
 		float AvgColourOrigImg;
+
+		void writeFeaturesToFile();
 		void coutData();
 	};
 
