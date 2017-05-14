@@ -7,15 +7,15 @@
 
 #include "targetver.h"
 
+#define _CRT_SECURE_NO_DEPRECATE
 #include <stdio.h>
 #include <tchar.h>
 
 
 // TODO: reference additional headers your program requires here
+
 #include <iostream>
 #include <fstream>
-#include <stdio.h>
-
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>

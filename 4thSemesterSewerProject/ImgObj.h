@@ -32,7 +32,7 @@ private:
 		float distFromCenter;
 		float AvgColourOrigImg;
 
-		void writeFeaturesToFile();
+		void writeFeaturesToFile(const std::string & fiName);
 		void coutData();
 	};
 

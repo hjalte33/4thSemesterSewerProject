@@ -490,81 +490,113 @@ double boundBoxAspectRatio(Mat inputImage) {
 	return ratio;
 }
 
+//float getDistToCenter(Mat inputImage) {
+//	int count = 0;
+//	int run = 0;
+//	float sum = 0;
+//	bool whiteState = false;
+//
+//
+//	for (int x = 0; x < inputImage.cols; x = x + 444) {
+//		for (int y = 0; y < inputImage.rows; y = y + 333) {
+//
+//			for (int xb = x; xb < x + 443; xb++) {
+//				for (int yb = y; yb < y + 332; yb++) {
+//					if (inputImage.at<uchar>(yb, xb) == 255) {
+//						whiteState = true;
+//					}
+//				}
+//			}
+//
+//			run++;
+//
+//			if (whiteState == true) {
+//				if (run < 10 || run == 17 || run == 18 || run == 26 || run == 27 || run == 35 || run == 36 || run == 44 || run == 45 || run == 53 || run == 54 || run == 62 || run == 63 || run > 70) {
+//
+//					sum += 1;
+//					whiteState = false;
+//					count++;
+//
+//				}
+//
+//				else if ((run >= 10 && run <= 16) || run == 19 || run == 25 || run == 28 || run == 34 || run == 37 || run == 43 || run == 46 || run == 52 || run == 55 || run == 61 || (run >= 64 && run <= 70)) {
+//
+//					sum += 2;
+//					whiteState = false;
+//					count++;
+//
+//				}
+//
+//				else if ((run >= 20 && run <= 24) || run == 29 || run == 33 || run == 38 || run == 42 || run == 47 || run == 52 || (run >= 56 && run <= 60)) {
+//
+//					sum += 3;
+//					whiteState = false;
+//					count++;
+//
+//				}
+//
+//				else if ((run >= 30 && run <= 32) || run == 39 || run == 41 || (run >= 48 && run <= 50)) {
+//
+//					sum += 4;
+//					whiteState = false;
+//					count++;
+//
+//				}
+//
+//				else if (run == 40) {
+//					sum += 5;
+//					whiteState = false;
+//					count++;
+//
+//				}
+//
+//				else {
+//					sum += 0;
+//					whiteState = false;
+//					count++;
+//
+//				}
+//
+//			}
+//
+//		}
+//	}
+//
+//	float avg = (sum / count);
+//
+//	return avg;
+//}
+
 float getDistToCenter(Mat inputImage) {
-	int count = 0;
-	int run = 0;
-	float sum = 0;
-	bool whiteState = false;
 
+	vector<vector<Point>> contours;
+	findContours(inputImage, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 
-	for (int x = 0; x < inputImage.cols; x = x + 444) {
-		for (int y = 0; y < inputImage.rows; y = y + 333) {
-
-			for (int xb = x; xb < x + 443; xb++) {
-				for (int yb = y; yb < y + 332; yb++) {
-					if (inputImage.at<uchar>(yb, xb) == 255) {
-						whiteState = true;
-					}
-				}
-			}
-
-			run++;
-
-			if (whiteState == true) {
-				if (run < 10 || run == 17 || run == 18 || run == 26 || run == 27 || run == 35 || run == 36 || run == 44 || run == 45 || run == 53 || run == 54 || run == 62 || run == 63 || run > 70) {
-
-					sum += 1;
-					whiteState = false;
-					count++;
-
-				}
-
-				else if ((run >= 10 && run <= 16) || run == 19 || run == 25 || run == 28 || run == 34 || run == 37 || run == 43 || run == 46 || run == 52 || run == 55 || run == 61 || (run >= 64 && run <= 70)) {
-
-					sum += 2;
-					whiteState = false;
-					count++;
-
-				}
-
-				else if ((run >= 20 && run <= 24) || run == 29 || run == 33 || run == 38 || run == 42 || run == 47 || run == 52 || (run >= 56 && run <= 60)) {
-
-					sum += 3;
-					whiteState = false;
-					count++;
-
-				}
-
-				else if ((run >= 30 && run <= 32) || run == 39 || run == 41 || (run >= 48 && run <= 50)) {
-
-					sum += 4;
-					whiteState = false;
-					count++;
-
-				}
-
-				else if (run == 40) {
-					sum += 5;
-					whiteState = false;
-					count++;
-
-				}
-
-				else {
-					sum += 0;
-					whiteState = false;
-					count++;
-
-				}
-
-			}
-
+	long int area = 0;
+	long int lastarea = 0;
+	int distC = 0;
+	int id = 0;
+	
+	if (contours.size() > 0) {
+	for (int i = 0; i < contours.size(); i++) {
+		area = contourArea(contours[i]);
+		if (area > lastarea) {
+			id = i;
+			lastarea = area;
 		}
 	}
 
-	float avg = (sum / count);
+	
+		Point issueC, imgC;
 
-	return avg;
+		issueC.x = moments(contours[id]).m10 / moments(contours[id]).m00;
+		issueC.y = moments(contours[id]).m01 / moments(contours[id]).m00;
+		imgC.x = inputImage.cols / 2;
+		imgC.y = inputImage.rows / 2;
+		distC = norm(issueC - imgC);
+	}
+
+	return distC;
 }
 
 float AverageColourIntensity(Mat inputImage, Mat originalImage, int Channel) {

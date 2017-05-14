@@ -61,10 +61,13 @@ void ImgObj::calculateScores() {
 	imshow("working on", src);
 	waitKey(1);
 
-	Features FSFeaturs = Features("FS"  , FSSegmentation(src, ref) , src);
+	Features FSFeaturs = Features("FS", FSSegmentation(src, ref), src);
 	Features ROEFeaturs = Features("ROE", ROESegmentation(src, ref), src);
-	Features RBFeaturs = Features("RB"  , RBSegmentation(src, ref) , src);
+	Features RBFeaturs = Features("RB", RBSegmentation(src, ref), src);
 
+	FSFeaturs.writeFeaturesToFile("FS");
+	ROEFeaturs.writeFeaturesToFile("ROE");
+	RBFeaturs.writeFeaturesToFile("RB");
 
 	cout << "Image name " << srcPath.filename() << endl;
 	ROEFeaturs.coutData();
@@ -84,12 +87,45 @@ ImgObj::Features::Features(std::string _name, cv::Mat input, cv::Mat orgSrc) {
 	avgAngleChange = AverageAngleChange(input, 10);
 	PerimAreaRatio = PerimeterToAreaRatio(input);
 	BoundBoxAspRatio = boundBoxAspectRatio(input);
-	//distFromCenter = getDistToCenter(input);
+	distFromCenter = getDistToCenter(input);
 	AvgColourOrigImg = AverageColourIntensity(input, orgSrc, 0);
 }
 
-void ImgObj::Features::writeFeaturesToFile() {
 
+
+inline bool doesFiExists(const std::string& name) {
+	if (std::FILE *file = std::fopen(name.c_str(), "r")) {
+		std::fclose(file);
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+void ImgObj::Features::writeFeaturesToFile(const std::string& fiName) {
+	// see if the file exists
+	if (!doesFiExists("./features/" + fiName + ".csv")) {
+		ofstream writeoutfile("./features/" + fiName + ".csv");
+		writeoutfile << "Area of issue," ;
+		writeoutfile << "Arclengths of issue," ;
+		writeoutfile << "Shape variance of issue," ;
+		writeoutfile << "Average angle change of issue," ;
+		writeoutfile << "Perimeter/area ratio of issue," ;
+		writeoutfile << "Boundary box aspect ratio," ;
+		writeoutfile << "Distance indicator,";
+		writeoutfile << "Average colour," << endl;
+	}
+	// format the data
+	ofstream writeoutfile("./features/" + fiName + ".csv", std::ios_base::app);
+	writeoutfile << area << ",";
+	writeoutfile << arclength << ",";
+	writeoutfile << shapeVariance << ",";
+	writeoutfile << avgAngleChange << ",";
+	writeoutfile << PerimAreaRatio << ",";
+	writeoutfile << boundBoxAspectRatio << ",";
+	writeoutfile << distFromCenter << ",";
+	writeoutfile << AvgColourOrigImg << endl;
 }
 
 void ImgObj::Features::coutData() {
@@ -101,6 +137,6 @@ void ImgObj::Features::coutData() {
 	cout << "Average angle change of issue: " << avgAngleChange << endl;
 	cout << "Perimeter/area ratio of issue: " << PerimAreaRatio << endl;
 	cout << "Boundary box of issue aspect ratio: " << BoundBoxAspRatio << endl;
-	//cout << "Distance indicator: " << distFromCenter << endl;
+	cout << "Distance indicator: " << distFromCenter << endl;
 	cout << "Average colour: " << AvgColourOrigImg << endl << endl;
 }
