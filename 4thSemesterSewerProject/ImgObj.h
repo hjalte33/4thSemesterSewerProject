@@ -21,24 +21,27 @@ private:
 
 	struct Features {
 		Features(std::string _name, cv::Mat input, cv::Mat orgSrc);
-		
+
 		std::string name;
 		long int area;
 		long int arclength;
 		float shapeVariance;
 		float avgAngleChange;
-		float PerimAreaRatio;
-		float BoundBoxAspRatio;
+		float perimAreaRatio;
+		float boundBoxAspRatio;
 		float distFromCenter;
-		float AvgColourOrigImg;
+		float avgColourOrigImg;
 
-		void writeFeaturesToFile(const std::string & fiName);
+		void writeFeaturesToFile(const std::string & fiName, Path inputFiPath);
 		void coutData();
+
+	private:
+		bool doesFiExists(const std::string & name);
 	};
 
 public:
-	ImgObj(Path _srcPath, Path _refPath);
-
+	ImgObj(Path _srcPath, Path _refPath, cv::Mat _trainingData);
+	cv::Mat trainingData;
 	Path srcPath = Path();
 	Path refPath = Path();
 
@@ -51,6 +54,8 @@ public:
 	void saveimg(std::string suffix);
 	void saveimg(cv::Mat img, Path imgsavepath, std::string suffix);
 	void saveimg(cv::Mat img, Path imgsavepath, Path logsavepath, std::string suffix);
+
+	void calculateTrainingdata();
 
 	void calculateScores();
 

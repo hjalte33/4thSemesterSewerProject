@@ -90,18 +90,6 @@ Mat rgbToGray(Mat src, int channel) {
 }
 
 
-
-
-Mat subtractRef(Mat inputImage, Mat ref) {
-
-	Mat output(inputImage.rows, inputImage.cols, CV_8U);
-	Mat intermediate(inputImage.rows, inputImage.cols, CV_8U);
-	subtract(ref, inputImage, intermediate);
-	bilateralFilter(intermediate, output, 11, 150, 150);
-
-	return output;
-}
-
 int getThresh(Mat inputImage) {
 	Scalar scalthresh = mean(inputImage);
 	int thresh = round(scalthresh.val[0]);
@@ -112,27 +100,22 @@ int getThresh(Mat inputImage) {
 Mat areaThresh(Mat inputImage) {
 	vector<vector<Point>> contours;
 	findContours(inputImage, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-
+	int biggestBlob = 0;
 	long int area = 0;
 	long int lastArea = 0;
 
-	for (int i = 0; i < contours.size(); i++) {
-		int lastcnt = i - 1;
-		if (lastcnt == -1) {
-			lastcnt = 0;
-		}
 
+	for (int i = 0; i < contours.size(); i++) {
 		area = contourArea(contours[i]);
 
-		if (area > lastArea) {
-			drawContours(inputImage, contours, lastcnt, Scalar(0), -1);
-			lastArea = area;
-
+		if (area < lastArea) {
+			drawContours(inputImage, contours, i, Scalar(0), FILLED);	
 		}
-
 		else {
-			drawContours(inputImage, contours, i, Scalar(0), -1);
-
+			if (i != 0) { 
+				drawContours(inputImage, contours, biggestBlob, Scalar(0), FILLED); };
+			biggestBlob = i;
+			lastArea = area;
 		}
 
 	}
@@ -165,7 +148,9 @@ Mat findContours1(Mat inputImage) {
 		}
 		else {
 			areaPrev = circleArea;
-			drawContours(inputImage, contours, biggestCirkleIndex, Scalar(0), -1);
+			if (i != 0) {
+				drawContours(inputImage, contours, biggestCirkleIndex, Scalar(0), -1);
+			}
 			biggestCirkleIndex = i;
 		}
 	}
@@ -185,14 +170,14 @@ Mat ROESegmentation(Mat src, Mat refImage) {
 	src = rgbToGray(src, 0, 0, 1); // get blue channel
 
 	//Blurring the background image for substracting
-	int KernelSize = 80;
+	int KernelSize = 30;
 	blur(refImgCopy, refImgCopy, Size(KernelSize, KernelSize));
 
 	//Substracting the two images and save it to diff
 	Mat diff = src - refImgCopy;
 
 	//Making the diff image binary
-	threshold(diff, diff, 120, 255, CV_THRESH_TOZERO);
+	threshold(diff, diff, 120, 255, CV_THRESH_BINARY);
 	namedWindow("ROE", WINDOW_KEEPRATIO);
 	imshow("ROE", diff);
 	waitKey(1);
@@ -220,19 +205,23 @@ Mat RBSegmentation(Mat src, Mat refImage) {
 	Mat image;
 	Mat ref;
 
-	image = rgbToGray(src, 2);
-	ref = rgbToGray(refImage, 2);
+	image = rgbToGray(src,2);
+	ref = rgbToGray(refImage,2);
 
-	image = subtractRef(image, ref);
+	Mat diff;
+	subtract(ref,image, diff) ;
+	bilateralFilter(diff, image, 11, 150, 150);
 
 	int thresval = getThresh(image);
 
 	threshold(image, image, thresval * 11, 255, THRESH_BINARY);
 
 	image = areaThresh(image);
+	
 	namedWindow("RB", WINDOW_KEEPRATIO);
 	imshow("RB", image);
 	waitKey(1);
+	
 	return image;
 }
 
@@ -241,8 +230,6 @@ Mat RBSegmentation(Mat src, Mat refImage) {
 // ------------------------------------------------------------------------
 // -------------------- Classification functions --------------------------
 // ------------------------------------------------------------------------
-
-
 
 
 long int getAreaFeature(Mat inputImage) {
@@ -286,7 +273,7 @@ long int getArclengthFeature(Mat inputImage) {
 	return arclengthKeep;
 }
 
-double getShapeVariance(Mat inputImage, int pd) {
+float getShapeVariance(Mat inputImage, int pd) {
 
 	vector<vector<Point>> contours;
 	findContours(inputImage, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
@@ -320,7 +307,7 @@ double getShapeVariance(Mat inputImage, int pd) {
 
 	if (n < 1)
 	{
-		return -1;
+		return 0;
 	}
 
 	for (int x = 0; x < n; x++)
@@ -382,7 +369,7 @@ double getShapeVariance(Mat inputImage, int pd) {
 	return Variance;
 }
 
-double AverageAngleChange(Mat inputImage, int pd) {
+float getAverageAngleChange(Mat inputImage, int pd) {
 	vector<vector<Point>> contours;
 	findContours(inputImage, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 
@@ -409,7 +396,7 @@ double AverageAngleChange(Mat inputImage, int pd) {
 
 	if (n < 1)
 	{
-		return -1;
+		return 0;
 	}
 
 	for (int x = 0; x < n; x++)
@@ -438,7 +425,7 @@ double AverageAngleChange(Mat inputImage, int pd) {
 	return AverageTangentDifference;
 }
 
-double PerimeterToAreaRatio(Mat inputImage) {
+float getPerimeterToAreaRatio(Mat inputImage) {
 	vector<vector<Point>> contours;
 	findContours(inputImage, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 	
@@ -463,7 +450,7 @@ double PerimeterToAreaRatio(Mat inputImage) {
 	return Ratio;
 }
 
-double boundBoxAspectRatio(Mat inputImage) {
+float getBoundBoxAspectRatio(Mat inputImage) {
 	vector<vector<Point>> contours;
 	findContours(inputImage, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 
@@ -476,96 +463,10 @@ double boundBoxAspectRatio(Mat inputImage) {
 			}
 		}
 	}
-
-
 	Rect rect = boundingRect(contours[b]);
 
-	double w = 0;
-	double h = 0;
-	double ratio = 0;
-	w = rect.width;
-	h = rect.height;
-	ratio = h / w;
-
-	return ratio;
+	return (1.0 * rect.height) / rect.width;
 }
-
-//float getDistToCenter(Mat inputImage) {
-//	int count = 0;
-//	int run = 0;
-//	float sum = 0;
-//	bool whiteState = false;
-//
-//
-//	for (int x = 0; x < inputImage.cols; x = x + 444) {
-//		for (int y = 0; y < inputImage.rows; y = y + 333) {
-//
-//			for (int xb = x; xb < x + 443; xb++) {
-//				for (int yb = y; yb < y + 332; yb++) {
-//					if (inputImage.at<uchar>(yb, xb) == 255) {
-//						whiteState = true;
-//					}
-//				}
-//			}
-//
-//			run++;
-//
-//			if (whiteState == true) {
-//				if (run < 10 || run == 17 || run == 18 || run == 26 || run == 27 || run == 35 || run == 36 || run == 44 || run == 45 || run == 53 || run == 54 || run == 62 || run == 63 || run > 70) {
-//
-//					sum += 1;
-//					whiteState = false;
-//					count++;
-//
-//				}
-//
-//				else if ((run >= 10 && run <= 16) || run == 19 || run == 25 || run == 28 || run == 34 || run == 37 || run == 43 || run == 46 || run == 52 || run == 55 || run == 61 || (run >= 64 && run <= 70)) {
-//
-//					sum += 2;
-//					whiteState = false;
-//					count++;
-//
-//				}
-//
-//				else if ((run >= 20 && run <= 24) || run == 29 || run == 33 || run == 38 || run == 42 || run == 47 || run == 52 || (run >= 56 && run <= 60)) {
-//
-//					sum += 3;
-//					whiteState = false;
-//					count++;
-//
-//				}
-//
-//				else if ((run >= 30 && run <= 32) || run == 39 || run == 41 || (run >= 48 && run <= 50)) {
-//
-//					sum += 4;
-//					whiteState = false;
-//					count++;
-//
-//				}
-//
-//				else if (run == 40) {
-//					sum += 5;
-//					whiteState = false;
-//					count++;
-//
-//				}
-//
-//				else {
-//					sum += 0;
-//					whiteState = false;
-//					count++;
-//
-//				}
-//
-//			}
-//
-//		}
-//	}
-//
-//	float avg = (sum / count);
-//
-//	return avg;
-//}
 
 float getDistToCenter(Mat inputImage) {
 
@@ -599,13 +500,12 @@ float getDistToCenter(Mat inputImage) {
 	return distC;
 }
 
-float AverageColourIntensity(Mat inputImage, Mat originalImage, int Channel) {
+float getAverageColourIntensity(Mat inputImage, Mat originalImage, int Channel) {
 
 	Scalar avgcolourvalue;
 
 	avgcolourvalue = mean(originalImage, inputImage);
 
 	return avgcolourvalue.val[Channel];
-
 }
 

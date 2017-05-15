@@ -24,20 +24,17 @@ int getThresh(Mat inputImage);
 
 Mat areaThresh(Mat inputImage);
 
+Mat findContours1(Mat inputImage);
+
 // ------------------------------------------------------------------------
 // ------------------- Segmentation functions -----------------------------
 // ------------------------------------------------------------------------
 
 Mat ROESegmentation(Mat src, Mat refImage);
 
-Mat findContours1(Mat inputImage);
-
 Mat FSSegmentation(Mat src, Mat refImage);
 
 Mat RBSegmentation(Mat src, Mat refImage);
-
-
-
 
 // ------------------------------------------------------------------------
 // -------------------- Classification functions --------------------------
@@ -47,17 +44,17 @@ long int getAreaFeature(Mat inputImage);
 
 long int getArclengthFeature(Mat inputImage);
 
-double getShapeVariance(Mat inputImage, int pd);
+float getShapeVariance(Mat inputImage, int pd);
 
-double AverageAngleChange(Mat inputImage, int pd);
+float getAverageAngleChange(Mat inputImage, int pd);
 
-double PerimeterToAreaRatio(Mat inputImage);
+float getPerimeterToAreaRatio(Mat inputImage);
 
-double boundBoxAspectRatio(Mat inputImage);
+float getBoundBoxAspectRatio(Mat inputImage);
 
 float getDistToCenter(Mat inputImage);
 
-float AverageColourIntensity(Mat inputImage, Mat originalImage, int Channel);
+float getAverageColourIntensity(Mat inputImage, Mat originalImage, int Channel);
 
 
 #endif
