@@ -3,35 +3,28 @@
 #include "stdafx.h"
 #include "Path.h"
 #include "ImgObj.h"
+#include "KnnData.h"
 
 
 using namespace cv;
 using namespace std;
+using namespace cv::ml;
+
+
 
 int main()
 {
-	// read the training data from this file
-	ifstream trainingDataPath("C:/HB/cppSpace/4thSemesterSewerProject/4thSemesterSewerProject/features/RB.csv");
-	Mat trainingData;
-	for (string line; getline(trainingDataPath, line);) {
-		stringstream ss(line);
+	string RBTrainDataPath = "C:/HB/cppSpace/4thSemesterSewerProject/4thSemesterSewerProject/features/RB.csv";
+	string RBlabelsPath = "C:/HB/cppSpace/4thSemesterSewerProject/4thSemesterSewerProject/features/RB_labels.csv";
+	KnnData RBTrainData = KnnData(RBTrainDataPath, RBlabelsPath);
 
-		Mat row = Mat(1, 8, 0);
-		string substr;
-		for (int i = 0; getline(ss, substr, ','); i++) {
-			row.at<uchar>(0, i) = stof(substr);
-		}
-		trainingData.push_back(row);
-	}
-	
+
 	//number of image path skipped because of some error
 	int skiped = 0;
-
+	int readError = 0;
 	// read the image paths from this file 
 	ifstream inputImgPath("./features/trainingDataPaths.txt");
 	
-	
-
 	// load the background image 
 	Path refPathName = Path("C:/Users/hjalt/Google Drev/Uni/P4 - Project/project/Pictures/New pictures/Normal pipe/Mean.png");
 	
@@ -41,20 +34,23 @@ int main()
 	for (Path srcPathName; getline(inputImgPath, srcPathName.completepath);) {
 		
 		int outcomented = srcPathName.completepath.find_first_of("#");
-		if (outcomented != -1) continue;
-		
-		ImgObj image = ImgObj(srcPathName, refPathName, trainingData);
+		if (outcomented != -1) {
+			skiped++;
+			continue;
+		}
+		ImgObj image = ImgObj(srcPathName, refPathName, RBTrainData.dist);
 		if (!image.readImages()) {
+			readError++;
 			continue;
 		}
 
 		// here the magic happens
 		image.calculateTrainingdata();
-	
+		image.calculateScores(RBTrainData.dist);
 	}
 
 	// wait a little and then close
-	cout << endl << "I skiped " << skiped << " images";
+	cout << endl << "I skiped " << skiped << " images, and hand trouble reading " << readError << " images";
 	cv::waitKey(0);
 	 
 	

@@ -177,7 +177,7 @@ Mat ROESegmentation(Mat src, Mat refImage) {
 	Mat diff = src - refImgCopy;
 
 	//Making the diff image binary
-	threshold(diff, diff, 120, 255, CV_THRESH_BINARY);
+	threshold(diff, diff, 135, 255, CV_THRESH_BINARY);
 	namedWindow("ROE", WINDOW_KEEPRATIO);
 	imshow("ROE", diff);
 	waitKey(1);
@@ -210,7 +210,9 @@ Mat RBSegmentation(Mat src, Mat refImage) {
 
 	Mat diff;
 	subtract(ref,image, diff) ;
-	bilateralFilter(diff, image, 11, 150, 150);
+	
+	int KernelSize = 30;
+	blur(diff, image, Size(KernelSize, KernelSize));
 
 	int thresval = getThresh(image);
 

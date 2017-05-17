@@ -57,7 +57,7 @@ public:
 
 	void calculateTrainingdata();
 
-	void calculateScores();
+	void calculateScores(Mat trainingData);
 
 
 };

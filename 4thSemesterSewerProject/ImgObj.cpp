@@ -56,7 +56,7 @@ inline Mat ImgObj::getRefFromFile(){
 void ImgObj::calculateTrainingdata() {
 	// make sure that the images are loaded
 	if (!isImagesLoaded) {
-		readImages();
+		if (!readImages()) return;
 	}
 	namedWindow("working on", WINDOW_KEEPRATIO);
 	imshow("working on", src);
@@ -79,10 +79,23 @@ void ImgObj::calculateTrainingdata() {
 	FSFeaturs.coutData();
 }
 
-void ImgObj::calculateScores() {
+void ImgObj::calculateScores(Mat trainingData) {
+	// make sure that the images are loaded correctly
+	if (!isImagesLoaded) {
+		if (!readImages()) return;
+	}
+	namedWindow("working on", WINDOW_KEEPRATIO);
+	imshow("working on", src);
+	waitKey(1);
+
+	//create a features struct for each of the 3 segmentations 
+	Features FSFeaturs = Features("FS", FSSegmentation(src, ref), src);
+	Features ROEFeaturs = Features("RO", ROESegmentation(src, ref), src);
+	Features RBFeaturs = Features("RB", RBSegmentation(src, ref), src);
+
+
 
 }
-
 
 
 //----------------------------------------------------------------------------
@@ -114,24 +127,14 @@ inline bool ImgObj::Features::doesFiExists(const std::string& name) {
 	}
 }
 
-void ImgObj::Features::writeFeaturesToFile(const std::string& fiName, Path inputFiPath = Path()) {
+void ImgObj::Features::writeFeaturesToFile(const std::string& className, Path inputFiPath = Path()) {
 	// see if the file exists and if not, create it and make headder
-	if (!doesFiExists("./features/" + fiName + ".csv")) {
-		ofstream writeoutfile("./features/" + fiName + ".csv");
-		writeoutfile << "Feature type,";
-		writeoutfile << "Area of issue,";
-		writeoutfile << "Arclengths of issue,";
-		writeoutfile << "Shape variance of issue,";
-		writeoutfile << "Average angle change of issue,";
-		writeoutfile << "Perimeter/area ratio of issue,";
-		writeoutfile << "Boundary box aspect ratio,";
-		writeoutfile << "Distance indicator,";
-		writeoutfile << "Average colour" << endl;
-	}
+	//if (!doesFiExists("./features/" + className + ".csv")) {
+	//	ofstream writeoutfile("./features/" + className + ".csv");
+	//}
 	// format the data
-	ofstream writeoutfile("./features/" + fiName + ".csv", std::ios_base::app);
+	ofstream writeoutfile("./features/" + className + ".csv", std::ios_base::app);
 	writeoutfile << std::fixed;
-	writeoutfile << inputFiPath.filename().substr(0,2) << ",";
 	writeoutfile << area << ",";
 	writeoutfile << arclength << ",";
 	writeoutfile << shapeVariance << ",";
@@ -140,10 +143,18 @@ void ImgObj::Features::writeFeaturesToFile(const std::string& fiName, Path input
 	writeoutfile << boundBoxAspRatio << ",";
 	writeoutfile << distFromCenter << ",";
 	writeoutfile << avgColourOrigImg << endl;
+
+	ofstream writeoutfilelable("./features/" + className + "_labels.csv", std::ios_base::app);
+	if (inputFiPath.filename().substr(0, 2) == className) {
+		writeoutfilelable << "1" << ",";
+	}
+	else {
+		writeoutfilelable << "0" << ",";
+	}
 }
 
 void ImgObj::Features::coutData() {
-	//Cout vars
+	//Cout vars for debugging
 	cout << name << " category" << std::fixed << endl;
 	cout << "Area of issue: " << area << endl;
 	cout << "Arclengths of issue: " << arclength << endl;

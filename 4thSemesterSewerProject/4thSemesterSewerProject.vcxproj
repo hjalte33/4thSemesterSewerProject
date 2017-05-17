@@ -152,6 +152,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImgObj.h" />
+    <ClInclude Include="KnnData.h" />
     <ClInclude Include="Path.h" />
     <ClInclude Include="Algorithms.h" />
     <ClInclude Include="stdafx.h" />
@@ -161,6 +162,7 @@
     <ClCompile Include="4thSemesterSewerProject.cpp" />
     <ClCompile Include="Algorithms.cpp" />
     <ClCompile Include="ImgObj.cpp" />
+    <ClCompile Include="KnnData.cpp" />
     <ClCompile Include="Path.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
