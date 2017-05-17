@@ -18,6 +18,14 @@ int main()
 	string RBlabelsPath = "C:/HB/cppSpace/4thSemesterSewerProject/4thSemesterSewerProject/features/RB_labels.csv";
 	KnnData RBTrainData = KnnData(RBTrainDataPath, RBlabelsPath);
 
+	string FSTrainDataPath = "C:/HB/cppSpace/4thSemesterSewerProject/4thSemesterSewerProject/features/FS.csv";
+	string FSlabelsPath = "C:/HB/cppSpace/4thSemesterSewerProject/4thSemesterSewerProject/features/FS_labels.csv";
+	KnnData FSTrainData = KnnData(FSTrainDataPath, FSlabelsPath);
+
+	string ROTrainDataPath = "C:/HB/cppSpace/4thSemesterSewerProject/4thSemesterSewerProject/features/RO.csv";
+	string ROlabelsPath = "C:/HB/cppSpace/4thSemesterSewerProject/4thSemesterSewerProject/features/RO_labels.csv";
+	KnnData ROTrainData = KnnData(ROTrainDataPath, ROlabelsPath);
+
 
 	//number of image path skipped because of some error
 	int skiped = 0;
@@ -32,21 +40,30 @@ int main()
 	// The Path struct is used here so it's easier to extract the
 	// path, filename and file extention when the images is saved.
 	for (Path srcPathName; getline(inputImgPath, srcPathName.completepath);) {
-		
+
 		int outcomented = srcPathName.completepath.find_first_of("#");
 		if (outcomented != -1) {
 			skiped++;
 			continue;
 		}
-		ImgObj image = ImgObj(srcPathName, refPathName, RBTrainData.dist);
+
+		ImgObj image = ImgObj(srcPathName, refPathName);
+
 		if (!image.readImages()) {
 			readError++;
 			continue;
 		}
 
 		// here the magic happens
-		image.calculateTrainingdata();
-		image.calculateScores(RBTrainData.dist);
+		// image.calculateTrainingdata();
+		image.calculateFeatures();
+		
+		float FSScore = FSTrainData.findKnn(image.getFeatures().row(0));
+		float ROScore = ROTrainData.findKnn(image.getFeatures().row(1));
+		float RBScore = RBTrainData.findKnn(image.getFeatures().row(2));
+		cout << "FS " << FSScore << endl;
+		cout << "RO " << ROScore << endl;
+		cout << "RB " << RBScore << endl << endl;
 	}
 
 	// wait a little and then close

@@ -17,8 +17,7 @@ bool ImgObj::readImages() {
 }
 
 
-ImgObj::ImgObj(Path _srcPath, Path _refPath, cv::Mat _trainingData) {
-	trainingData = _trainingData;
+ImgObj::ImgObj(Path _srcPath, Path _refPath) {
 	srcPath = _srcPath;
 	refPath = _refPath;
 }
@@ -53,7 +52,7 @@ inline Mat ImgObj::getRefFromFile(){
 	return imread(refPath.completepath);
 }
 
-void ImgObj::calculateTrainingdata() {
+void ImgObj::writeTrainingdata() {
 	// make sure that the images are loaded
 	if (!isImagesLoaded) {
 		if (!readImages()) return;
@@ -63,23 +62,23 @@ void ImgObj::calculateTrainingdata() {
 	waitKey(1);
 
 	//create a features struct for each of the 3 segmentations 
-	Features FSFeaturs = Features("FS", FSSegmentation(src, ref), src);
-	Features ROEFeaturs = Features("ROE", ROESegmentation(src, ref), src);
-	Features RBFeaturs = Features("RB", RBSegmentation(src, ref), src);
+	FSFeaturs = Features("FS", FSSegmentation(src, ref), src);
+	ROFeaturs = Features("ROE", ROESegmentation(src, ref), src);
+	RBFeaturs = Features("RB", RBSegmentation(src, ref), src);
 
 	// accquire training data
 	FSFeaturs.writeFeaturesToFile("FS", srcPath.completepath);
-	ROEFeaturs.writeFeaturesToFile("ROE", srcPath.completepath);
+	ROFeaturs.writeFeaturesToFile("ROE", srcPath.completepath);
 	RBFeaturs.writeFeaturesToFile("RB", srcPath.completepath);
 
 	//cout for debugging
 	cout << "Image name " << srcPath.filename() << endl;
-	ROEFeaturs.coutData();
+	ROFeaturs.coutData();
 	RBFeaturs.coutData();
 	FSFeaturs.coutData();
 }
 
-void ImgObj::calculateScores(Mat trainingData) {
+void ImgObj::calculateFeatures() {
 	// make sure that the images are loaded correctly
 	if (!isImagesLoaded) {
 		if (!readImages()) return;
@@ -89,13 +88,27 @@ void ImgObj::calculateScores(Mat trainingData) {
 	waitKey(1);
 
 	//create a features struct for each of the 3 segmentations 
-	Features FSFeaturs = Features("FS", FSSegmentation(src, ref), src);
-	Features ROEFeaturs = Features("RO", ROESegmentation(src, ref), src);
-	Features RBFeaturs = Features("RB", RBSegmentation(src, ref), src);
+	FSFeaturs = Features("FS", FSSegmentation(src, ref), src);
+	ROFeaturs = Features("RO", ROESegmentation(src, ref), src);
+	RBFeaturs = Features("RB", RBSegmentation(src, ref), src);
+
+	featuresMat.push_back(FSFeaturs.getFeaturAsMat());
+	featuresMat.push_back(ROFeaturs.getFeaturAsMat());
+	featuresMat.push_back(RBFeaturs.getFeaturAsMat());
+}
+
+cv::Mat ImgObj::getFeatures()
+{
+	return featuresMat;
+}
 
 
+
+void ImgObj::calculateScores() {
 
 }
+
+
 
 
 //----------------------------------------------------------------------------
@@ -103,6 +116,10 @@ void ImgObj::calculateScores(Mat trainingData) {
 //----------------------------------------------------------------------------
 
 // constructor calculates all the fetures and populates the struct 
+ImgObj::Features::Features() {
+
+}
+
 ImgObj::Features::Features(std::string _name, cv::Mat input, cv::Mat orgSrc) {
 	name = _name;
 	area = getAreaFeature(input);
@@ -125,6 +142,19 @@ inline bool ImgObj::Features::doesFiExists(const std::string& name) {
 	else {
 		return false;
 	}
+}
+
+Mat ImgObj::Features::getFeaturAsMat() {
+	Mat output = Mat(1, 8, CV_32FC1);
+	output.at<float>(0, 0) = area;
+	output.at<float>(0, 1) = arclength;
+	output.at<float>(0, 2) = shapeVariance;
+	output.at<float>(0, 3) = avgAngleChange;
+	output.at<float>(0, 4) = perimAreaRatio;
+	output.at<float>(0, 5) = boundBoxAspRatio;
+	output.at<float>(0, 6) = distFromCenter;
+	output.at<float>(0, 7) = avgColourOrigImg;
+	return output;
 }
 
 void ImgObj::Features::writeFeaturesToFile(const std::string& className, Path inputFiPath = Path()) {
