@@ -62,20 +62,20 @@ void ImgObj::writeTrainingdata() {
 	waitKey(1);
 
 	//create a features struct for each of the 3 segmentations 
-	FSFeaturs = Features("FS", FSSegmentation(src, ref), src);
-	ROFeaturs = Features("ROE", ROESegmentation(src, ref), src);
-	RBFeaturs = Features("RB", RBSegmentation(src, ref), src);
+	Features FSFeatures = Features("FS", FSSegmentation(src, ref), src);
+	Features ROFeatures = Features("RO", ROESegmentation(src, ref), src);
+	Features RBFeatures = Features("RB", RBSegmentation(src, ref), src);
 
 	// accquire training data
-	FSFeaturs.writeFeaturesToFile("FS", srcPath.completepath);
-	ROFeaturs.writeFeaturesToFile("ROE", srcPath.completepath);
-	RBFeaturs.writeFeaturesToFile("RB", srcPath.completepath);
+	FSFeatures.writeFeaturesToFile("FS", srcPath.completepath);
+	ROFeatures.writeFeaturesToFile("RO", srcPath.completepath);
+	RBFeatures.writeFeaturesToFile("RB", srcPath.completepath);
 
 	//cout for debugging
 	cout << "Image name " << srcPath.filename() << endl;
-	ROFeaturs.coutData();
-	RBFeaturs.coutData();
-	FSFeaturs.coutData();
+	ROFeatures.coutData();
+	RBFeatures.coutData();
+	FSFeatures.coutData();
 }
 
 void ImgObj::calculateFeatures() {
@@ -88,26 +88,19 @@ void ImgObj::calculateFeatures() {
 	waitKey(1);
 
 	//create a features struct for each of the 3 segmentations 
-	FSFeaturs = Features("FS", FSSegmentation(src, ref), src);
-	ROFeaturs = Features("RO", ROESegmentation(src, ref), src);
-	RBFeaturs = Features("RB", RBSegmentation(src, ref), src);
+	Features FSFeatures = Features("FS", FSSegmentation(src, ref), src);
+	Features ROFeatures = Features("RO", ROESegmentation(src, ref), src);
+	Features RBFeatures = Features("RB", RBSegmentation(src, ref), src);
 
-	featuresMat.push_back(FSFeaturs.getFeaturAsMat());
-	featuresMat.push_back(ROFeaturs.getFeaturAsMat());
-	featuresMat.push_back(RBFeaturs.getFeaturAsMat());
+	featuresMat.push_back(FSFeatures.getFeaturAsMat());
+	featuresMat.push_back(ROFeatures.getFeaturAsMat());
+	featuresMat.push_back(RBFeatures.getFeaturAsMat());
 }
 
-cv::Mat ImgObj::getFeatures()
+cv::Mat ImgObj::getFeaturesMat()
 {
 	return featuresMat;
 }
-
-
-
-void ImgObj::calculateScores() {
-
-}
-
 
 
 
@@ -116,10 +109,6 @@ void ImgObj::calculateScores() {
 //----------------------------------------------------------------------------
 
 // constructor calculates all the fetures and populates the struct 
-ImgObj::Features::Features() {
-
-}
-
 ImgObj::Features::Features(std::string _name, cv::Mat input, cv::Mat orgSrc) {
 	name = _name;
 	area = getAreaFeature(input);
@@ -130,18 +119,6 @@ ImgObj::Features::Features(std::string _name, cv::Mat input, cv::Mat orgSrc) {
 	boundBoxAspRatio = getBoundBoxAspectRatio(input);
 	distFromCenter = getDistToCenter(input);
 	avgColourOrigImg = getAverageColourIntensity(input, orgSrc, 0);
-}
-
-
-
-inline bool ImgObj::Features::doesFiExists(const std::string& name) {
-	if (std::FILE *file = std::fopen(name.c_str(), "r")) {
-		std::fclose(file);
-		return true;
-	}
-	else {
-		return false;
-	}
 }
 
 Mat ImgObj::Features::getFeaturAsMat() {

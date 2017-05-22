@@ -13,11 +13,14 @@ private:
 	Mat ref;
 	bool isImagesLoaded = false;
 	int imgclass;
-
+	cv::Mat featuresMat;
+	
 	struct Features {
-		Features();
 		Features(std::string _name, cv::Mat input, cv::Mat orgSrc);
-
+		cv::Mat getFeaturAsMat();
+		void writeFeaturesToFile(const std::string & fiName, Path inputFiPath);
+		void coutData();
+	private:
 		std::string name;
 		long int area;
 		long int arclength;
@@ -26,21 +29,8 @@ private:
 		float perimAreaRatio;
 		float boundBoxAspRatio;
 		float distFromCenter;
-		float avgColourOrigImg;
-
-		void writeFeaturesToFile(const std::string & fiName, Path inputFiPath);
-		void coutData();
-		cv::Mat getFeaturAsMat();
-	private:
-		bool doesFiExists(const std::string & name);
-		
+		float avgColourOrigImg;		
 	};
-
-	Features FSFeaturs;
-	Features ROFeaturs;
-	Features RBFeaturs;
-
-	cv::Mat featuresMat;
 
 public:
 	// the constructor calculates all the features.
@@ -57,14 +47,14 @@ public:
 	void saveimg(cv::Mat img, Path imgsavepath, std::string suffix);
 	void saveimg(cv::Mat img, Path imgsavepath, Path logsavepath, std::string suffix);
 
+	//This functions calculates the features and write the nessesary files with the trainingdata
 	void writeTrainingdata();
 
+	//calculates the features and pushes them the the featuresMatrix 
 	void calculateFeatures();
 
-	cv::Mat getFeatures();
-
-	void calculateScores();
-
+	//returs the featursMatrix
+	cv::Mat getFeaturesMat();
 
 };
 

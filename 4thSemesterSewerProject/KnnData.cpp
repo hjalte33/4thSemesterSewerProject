@@ -58,14 +58,14 @@ Mat KnnData::NormaliseDataCol(Mat_<float> inputMatrix) {
 }
 
 
-//constructor. 
+// The constructor fetches the training data and trains the knn algorithm.  
 KnnData::KnnData(std::string _trainingDataPath, std::string _labelsDataPath) {
 	
 
 	// read the training data from this file
 	ifstream trainingDataPath(_trainingDataPath);
 
-
+	//number of features are hardcoded to be 8 
 	Mat_<float> trainingData(0, 8, CV_32FC1);
 	for (string line; getline(trainingDataPath, line);) {
 		stringstream ss(line);
@@ -81,6 +81,7 @@ KnnData::KnnData(std::string _trainingDataPath, std::string _labelsDataPath) {
 	//normalize data
 	trainingDataNorm = NormaliseDataCol(trainingData);
 
+	//get the labels from file and put them into a vector
 	ifstream trainingDataLablesPath(_labelsDataPath);
 	string line;
 	getline(trainingDataLablesPath, line);
@@ -92,6 +93,7 @@ KnnData::KnnData(std::string _trainingDataPath, std::string _labelsDataPath) {
 		trainLabels.push_back(stof(substr));
 	}
 	
+	// Train the Knn 
 	knn->train(trainingDataNorm, ROW_SAMPLE, trainLabels);
 }
 
