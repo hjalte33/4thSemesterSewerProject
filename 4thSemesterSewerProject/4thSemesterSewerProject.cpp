@@ -1,5 +1,7 @@
 // 4thSemesterSewerProject.cpp : Defines the entry point for the console application.
 //
+
+
 #include "stdafx.h"
 #include "Path.h"
 #include "ImgObj.h"
@@ -10,24 +12,22 @@ using namespace cv;
 using namespace std;
 using namespace cv::ml;
 
+	string testno = "1";
+	string testFolderName = "./data/sampleTest" + testno + "/";
 
-
-int main()
+void runTestPhotos()
 {
-	string testno = "9";
-	string testFolderName = "C:/Users/hjalt/Desktop/test" + testno + "/";
-	
 	// reading the training data and train knn
-	string RBTrainDataPath = testFolderName + "RB.csv";
-	string RBlabelsPath = testFolderName + "RB_labels.csv";
+	string RBTrainDataPath = testFolderName + "features/RB.csv";
+	string RBlabelsPath = testFolderName + "features/RB_labels.csv";
 	KnnData RBTrainData = KnnData(RBTrainDataPath, RBlabelsPath);
 
-	string FSTrainDataPath = testFolderName + "FS.csv";
-	string FSlabelsPath = testFolderName + "FS_labels.csv";
+	string FSTrainDataPath = testFolderName + "features/FS.csv";
+	string FSlabelsPath = testFolderName + "features/FS_labels.csv";
 	KnnData FSTrainData = KnnData(FSTrainDataPath, FSlabelsPath);
 
-	string ROTrainDataPath = testFolderName + "RO.csv";
-	string ROlabelsPath = testFolderName + "RO_labels.csv";
+	string ROTrainDataPath = testFolderName + "features/RO.csv";
+	string ROlabelsPath = testFolderName + "features/RO_labels.csv";
 	KnnData ROTrainData = KnnData(ROTrainDataPath, ROlabelsPath);
 
 
@@ -36,16 +36,16 @@ int main()
 	int readError = 0;
 	// read the image paths from this file 
 	//ifstream inputImgPath("C:/Users/hjalt/Desktop/test1/trainingPhotosPaths.txt");
-	ifstream inputImgPath(testFolderName + "testPhotosPaths (" + testno + ").txt");
+	ifstream inputImgPaths(testFolderName + "testPhotosPaths (" + testno + ").txt");
 
 
 	// load the background image 
-	Path refPathName = Path("C:/Users/hjalt/Desktop/testMaster/Mean.png");
+	Path refPathName = Path(testFolderName +"photos/backgroundMean.png");
 	
 	// Go through each image in the path file.
 	// The Path struct is used here so it's easier to extract the
 	// path, filename and file extention when the images is saved.
-	for (Path srcPathName; getline(inputImgPath, srcPathName.completepath);) {
+	for (Path srcPathName; getline(inputImgPaths, srcPathName.completepath);) {
 
 		int outcomented = srcPathName.completepath.find_first_of("#");
 		if (outcomented != -1) {
@@ -84,9 +84,53 @@ int main()
 	cout << endl << "I skiped " << skiped << " images, and hand trouble reading " << readError << " images";
 	cv::waitKey(0);
 	 
+}
+
+void runTrainingData() {
+
+	//number of image path skipped because of some error
+	int skiped = 0;
+	int readError = 0;
 	
-	return 0;
+	// read the image paths from this file 
+	//ifstream inputImgPath("C:/Users/hjalt/Desktop/test1/trainingPhotosPaths.txt");
+	ifstream inputImgPaths(testFolderName + "trainingPhotosPaths (" + testno + ").txt");
+
+
+	// load the background image 
+	Path refPathName = Path(testFolderName + "photos/backgroundMean.png");
+	
+	// Go through each image in the path file.
+	// The Path struct is used here so it's easier to extract the
+	// path, filename and file extention when the images is saved.
+	for (Path srcPathName; getline(inputImgPaths, srcPathName.completepath);) {
+		// lines that start with a # wil be instantly ignored 
+		int outcomented = srcPathName.completepath.find_first_of("#");
+		if (outcomented != -1) {
+			skiped++;
+			continue;
+		}
+
+		//create an image object. 
+		ImgObj image = ImgObj(srcPathName, refPathName);
+
+		// try to read the image
+		if (!image.readImages()) {
+			readError++;
+			continue;
+		}
+
+		// here the it calls the function to write trainingdata. 
+		image.writeTrainingdata();
+	}
+
+	// wait for keypress, then close
+	cout << endl << "I skiped " << skiped << " images, and hand trouble reading " << readError << " images";
+	cv::waitKey(0);
 }
 
 
 
+int main() {
+	runTrainingData();
+}

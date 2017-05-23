@@ -37,7 +37,7 @@ Mat findContours1(Mat inputImage);
 *It uses the blue channel that has the higest brighness value for the roots 
 * and everything else is relativly black. 
 */
-Mat ROESegmentation(Mat src, Mat refImage);
+Mat ROSegmentation(Mat src, Mat refImage);
 
 /** Segmentation algorithm that is good for offset pipes
 * It finds contours and delets the smallest ones.

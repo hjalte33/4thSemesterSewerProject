@@ -3,7 +3,7 @@
 #include "Algorithms.h"
 #include "Path.h"
 
-
+// reads the images and checks if they are read correctly
 bool ImgObj::readImages() {
 	src = cv::imread(srcPath.completepath);
 	ref = cv::imread(refPath.completepath);
@@ -16,7 +16,7 @@ bool ImgObj::readImages() {
 	}
 }
 
-
+// constructor
 ImgObj::ImgObj(Path _srcPath, Path _refPath) {
 	srcPath = _srcPath;
 	refPath = _refPath;
@@ -27,7 +27,6 @@ void ImgObj::saveimg(std::string suffix = "_result") {
 	string savepathname = srcPath.dir() + srcPath.filename() + suffix + srcPath.ext();
 	imwrite(savepathname, src);
 }
-
 
 // Saves the specified image at the specified location 
 void ImgObj::saveimg(cv::Mat img, Path imgsavepath, std::string suffix = "_result") {
@@ -63,7 +62,7 @@ void ImgObj::writeTrainingdata() {
 
 	//create a features struct for each of the 3 segmentations 
 	Features FSFeatures = Features("FS", FSSegmentation(src, ref), src);
-	Features ROFeatures = Features("RO", ROESegmentation(src, ref), src);
+	Features ROFeatures = Features("RO", ROSegmentation(src, ref), src);
 	Features RBFeatures = Features("RB", RBSegmentation(src, ref), src);
 
 	// accquire training data
@@ -88,8 +87,11 @@ void ImgObj::calculateFeatures() {
 	waitKey(1);
 
 	//create a features struct for each of the 3 segmentations 
+	// the name that is passed the the fuction must be exatly the same two letters 
+	// as the first two letters of the file name. This is used when the labels 
+	// are written. 
 	Features FSFeatures = Features("FS", FSSegmentation(src, ref), src);
-	Features ROFeatures = Features("RO", ROESegmentation(src, ref), src);
+	Features ROFeatures = Features("RO", ROSegmentation(src, ref), src);
 	Features RBFeatures = Features("RB", RBSegmentation(src, ref), src);
 
 	featuresMat.push_back(FSFeatures.getFeaturAsMat());
@@ -135,12 +137,8 @@ Mat ImgObj::Features::getFeaturAsMat() {
 }
 
 void ImgObj::Features::writeFeaturesToFile(const std::string& className, Path inputFiPath = Path()) {
-	// see if the file exists and if not, create it and make headder
-	//if (!doesFiExists("./features/" + className + ".csv")) {
-	//	ofstream writeoutfile("./features/" + className + ".csv");
-	//}
 	// format the data
-	ofstream writeoutfile("./features/" + className + ".csv", std::ios_base::app);
+	ofstream writeoutfile(inputFiPath.dir() + "../features/" + className + ".csv", std::ios_base::app);
 	writeoutfile << std::fixed;
 	writeoutfile << area << ",";
 	writeoutfile << arclength << ",";
@@ -151,12 +149,27 @@ void ImgObj::Features::writeFeaturesToFile(const std::string& className, Path in
 	writeoutfile << distFromCenter << ",";
 	writeoutfile << avgColourOrigImg << endl;
 
-	ofstream writeoutfilelable("./features/" + className + "_labels.csv", std::ios_base::app);
-	if (inputFiPath.filename().substr(0, 2) == className) {
-		writeoutfilelable << "1" << ",";
+	string labelFiName = inputFiPath.dir() + "../features/" + className + "_labels.csv";
+	//if the file does exists, append a comma and a no, else write only the number.
+	if (doesFileExist(labelFiName)) {
+		ofstream writeoutfilelable(labelFiName, std::ios_base::app);
+		//check if the class name maches the file name and write the label file
+		if (inputFiPath.filename().substr(0, 2) == className) {
+			writeoutfilelable << "," << "1" ;
+		}
+		else {
+			writeoutfilelable << "," << "0" ;
+		}
 	}
-	else {
-		writeoutfilelable << "0" << ",";
+	else {	
+		ofstream writeoutfilelable(labelFiName, std::ios_base::app);
+		//check if the class name maches the file name and write the label file
+		if (inputFiPath.filename().substr(0, 2) == className) {
+			writeoutfilelable << "1" ;
+		}
+		else {
+			writeoutfilelable << "0" ;
+		}
 	}
 }
 
@@ -171,4 +184,15 @@ void ImgObj::Features::coutData() {
 	cout << "Boundary box of issue aspect ratio: " << boundBoxAspRatio << endl;
 	cout << "Distance indicator: " << distFromCenter << endl;
 	cout << "Average colour: " << avgColourOrigImg << endl << endl;
+}
+
+
+inline bool ImgObj::Features::doesFileExist(const std::string& name) {
+	if (FILE *file = fopen(name.c_str(), "r")) {
+		fclose(file);
+		return true;
+	}
+	else {
+		return false;
+	}
 }

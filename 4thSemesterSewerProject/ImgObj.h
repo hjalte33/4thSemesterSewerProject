@@ -30,6 +30,7 @@ private:
 		float boundBoxAspRatio;
 		float distFromCenter;
 		float avgColourOrigImg;		
+		bool doesFileExist(const std::string & name);
 	};
 
 public:

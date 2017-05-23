@@ -7,7 +7,7 @@
 
 #include "targetver.h"
 
-#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE //supresses some errors
 #include <stdio.h>
 #include <tchar.h>
 

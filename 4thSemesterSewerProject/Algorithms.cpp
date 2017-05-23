@@ -164,7 +164,7 @@ Mat findContours1(Mat inputImage) {
 // ------------------------------------------------------------------------
 
 
-Mat ROESegmentation(Mat src, Mat refImage) {
+Mat ROSegmentation(Mat src, Mat refImage) {
 
 	Mat refImgCopy = rgbToGray(refImage.clone(), 0, 0, 1);
 	src = rgbToGray(src, 0, 0, 1); // get blue channel
