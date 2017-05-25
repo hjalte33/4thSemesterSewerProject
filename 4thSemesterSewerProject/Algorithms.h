@@ -25,9 +25,9 @@ Mat rgbToGray(Mat src, int channel);
 
 int getThresh(Mat inputImage);
 
-Mat areaThresh(Mat inputImage);
+Mat keepBlobBiggestArea(Mat inputImage);
 
-Mat findContours1(Mat inputImage);
+Mat keepBlobBiggestEnclosingCircle(Mat inputImage);
 
 // ------------------------------------------------------------------------
 // ------------------- Segmentation functions -----------------------------

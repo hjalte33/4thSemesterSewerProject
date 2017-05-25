@@ -63,7 +63,7 @@ struct RGB {        //members are in "bgr" order!
 };
 
 
-
+//converts an rgb to grayscale using the the RGB weights specified. The weights are normalised internaly
 Mat rgbToGray(cv::Mat src, float red, float green, float blue) {
 	float norm = 1 / (red + green + blue);
 	float _red = red * norm;
@@ -82,6 +82,7 @@ Mat rgbToGray(cv::Mat src, float red, float green, float blue) {
 	return grayscale;
 }
 
+//converts an rgb to grayscale using the BGR channel specified
 Mat rgbToGray(Mat src, int channel) {
 	Mat bgr[3];
 	split(src, bgr);
@@ -97,7 +98,7 @@ int getThresh(Mat inputImage) {
 }
 
 
-Mat areaThresh(Mat inputImage) {
+Mat keepBlobBiggestArea(Mat inputImage) {
 	vector<vector<Point>> contours;
 	findContours(inputImage, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 	int biggestBlob = 0;
@@ -125,7 +126,7 @@ Mat areaThresh(Mat inputImage) {
 
 
 /// Find contours twice to remove the middle cirkle of the image.
-Mat findContours1(Mat inputImage) {
+Mat keepBlobBiggestEnclosingCircle(Mat inputImage) {
 
 	vector<vector<Point>> contours;
 	findContours(inputImage, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
@@ -193,7 +194,7 @@ Mat FSSegmentation(Mat src, Mat refImage) {
 	Mat elementOpen = getStructuringElement(MORPH_RECT, Size(8, 8));
 	morphologyEx(redImage, redImage, MORPH_OPEN, elementOpen);
 
-	Mat contours1 = findContours1(redImage);
+	Mat contours1 = keepBlobBiggestEnclosingCircle(redImage);
 	namedWindow("FS", WINDOW_KEEPRATIO);
 	imshow("FS", contours1);
 	waitKey(1);
@@ -218,7 +219,7 @@ Mat RBSegmentation(Mat src, Mat refImage) {
 
 	threshold(image, image, thresval * 11, 255, THRESH_BINARY);
 
-	image = areaThresh(image);
+	image = keepBlobBiggestArea(image);
 	
 	namedWindow("RB", WINDOW_KEEPRATIO);
 	imshow("RB", image);
