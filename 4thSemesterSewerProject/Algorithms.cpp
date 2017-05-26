@@ -446,7 +446,7 @@ float getPerimeterToAreaRatio(Mat inputImage) {
 	double Ratio = 0;
 	if ((arcLength(contours[b], false) == 0) || (contourArea(contours[b], false) == 0))
 	{
-		return -1;
+		return 0;
 	}
 
 	Ratio = arcLength(contours[b], false) / contourArea(contours[b], false);
